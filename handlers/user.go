@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log" // Import the log package
 	"main/database"
 	"main/managers"
@@ -28,16 +29,30 @@ func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 }
 
 func (userHandler *UserHandler) Create(ctx *gin.Context) {
-	
-	user := &models.User{FullName: "Steven", Email: "steven@1234.com"}
+
+	var userData struct {
+		FullName string `json:"full_name"`
+		Email    string `json:"email"`
+	}
+
+	err := ctx.BindJSON(&userData)
+
+	fmt.Println(userData.FullName)
+	fmt.Println(userData.Email)
+
+	if err!=nil{
+		fmt.Println("Failed to bind data")
+	}
+
+	user := &models.User{FullName: userData.FullName, Email: userData.Email}
 
 	result := database.DB.Create(user) // Store the result
 	if result.Error != nil {
 		log.Printf("Database error creating user: %v", result.Error)
 
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to create user", 
-			"details": result.Error.Error(),  
+			"error":   "Failed to create user",
+			"details": result.Error.Error(),
 		})
 		return
 	}
