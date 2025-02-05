@@ -14,7 +14,7 @@ func main() {
 	router := gin.Default()
 
 	log.Println("Database Initializing started...")
-	database.Intialize()
+	database.Initialize()
 	log.Println("Database Initializing ended...")
 
 
