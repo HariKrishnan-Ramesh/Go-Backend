@@ -34,6 +34,7 @@ func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 	userGroup.POST("", userHandler.Create)
 	userGroup.GET("",userHandler.List)
 	userGroup.GET(":userid/",userHandler.Get)
+	userGroup.DELETE(":userid/",userHandler.Delete)
 }
 
 
@@ -48,13 +49,14 @@ func (userHandler *UserHandler) Create(ctx *gin.Context) {
 	fmt.Println(userData.Email)
 
 	if err!=nil{
-		fmt.Println("Failed to bind data")
+		
+		common.BadResponse(ctx, "Failed to bind data")
 	}
 
 	newUser, err := userHandler.userManager.Create(userData)
 	 
 	if err != nil {
-		fmt.Println("failed to create a user")
+		common.BadResponse(ctx, "failed to create a user")
 	}
 
 	ctx.JSON(http.StatusOK,newUser)
@@ -66,7 +68,7 @@ func (userHandler *UserHandler) List(ctx *gin.Context) {
 
 	allUser, err := userHandler.userManager.List()
 	if err != nil {
-		fmt.Println("failed to fetch list")
+		common.BadResponse(ctx, "failed to fetch list")
 	}
 
 	ctx.JSON(http.StatusOK,allUser)
@@ -83,10 +85,37 @@ func (userHandler *UserHandler) Get(ctx *gin.Context) {
 	}
 
 	allUser , err := userHandler.userManager.Get(detailUser)
+
+	if allUser.ID == 0 {
+		common.BadResponse(ctx, "User is already deleted")
+
+		return
+	}
+
+
 	if err!=nil{
 		fmt.Println("Failed to fetch the user")
 	}
-	
+
 	ctx.JSON(http.StatusOK,allUser)
 }
 
+
+//Deleting the user
+func (userHandler *UserHandler) Delete(ctx *gin.Context) {
+
+	deleteUser , ok := ctx.Params.Get("userid")
+	 
+	if !ok{
+		fmt.Println("failed to delete user")
+	}
+
+	_,err := userHandler.userManager.Delete(deleteUser)
+
+	if err!=nil{
+		fmt.Println("Failed to delete the user")
+	}
+	
+	common.SuccessResponse(ctx , "Deleted user")
+
+}
