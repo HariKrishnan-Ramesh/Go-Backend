@@ -48,3 +48,12 @@ func (userManager *UserManager) Get(id string) (models.User,error){
 
 	return user, nil
 }
+
+func (userManager *UserManager) Delete(id string) (*models.User,error){
+
+	user := &models.User{}
+	database.DB.Delete(user, id)
+
+	return user, nil
+}
+
