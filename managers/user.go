@@ -26,3 +26,13 @@ func (userManager *UserManager) Create(userData *common.UserCreationInput) (*mod
 
 	return newUser,nil
 }
+
+
+func (userManager *UserManager) List() ([]models.User,error){
+
+	users := []models.User{}
+	database.DB.Find(&users)
+
+	return users, nil
+}
+
