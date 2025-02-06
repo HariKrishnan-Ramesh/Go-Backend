@@ -15,6 +15,8 @@ func NewUserManager() *UserManager {
 	return &UserManager{}
 }
 
+
+//Create New User
 func (userManager *UserManager) Create(userData *common.UserCreationInput) (*models.User,error){
 
 	newUser := &models.User{FullName: userData.FullName,Email: userData.Email}
@@ -28,6 +30,7 @@ func (userManager *UserManager) Create(userData *common.UserCreationInput) (*mod
 }
 
 
+//List All Users
 func (userManager *UserManager) List() ([]models.User,error){
 
 	users := []models.User{}
@@ -36,3 +39,12 @@ func (userManager *UserManager) List() ([]models.User,error){
 	return users, nil
 }
 
+
+//Get Single User
+func (userManager *UserManager) Get(id string) (models.User,error){
+
+	user := models.User{}
+	database.DB.First(&user, id)
+
+	return user, nil
+}
