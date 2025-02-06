@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"fmt"
-	"log" // Import the log package
-	"main/database"
+	// "log" // Import the log package
+	"main/common"
+	// "main/database"
 	"main/managers"
-	"main/models"
+	// "main/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,10 +31,12 @@ func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 
 func (userHandler *UserHandler) Create(ctx *gin.Context) {
 
-	var userData struct {
-		FullName string `json:"full_name"`
-		Email    string `json:"email"`
-	}
+	// var userData struct {
+	// 	FullName string `json:"full_name"`
+	// 	Email    string `json:"email"`
+	// }
+
+	userData := common.NewUserCreationInput()
 
 	err := ctx.BindJSON(&userData)
 
@@ -44,21 +47,23 @@ func (userHandler *UserHandler) Create(ctx *gin.Context) {
 		fmt.Println("Failed to bind data")
 	}
 
-	user := &models.User{FullName: userData.FullName, Email: userData.Email}
+	// user := &models.User{FullName: userData.FullName, Email: userData.Email}
 
-	result := database.DB.Create(user) // Store the result
-	if result.Error != nil {
-		log.Printf("Database error creating user: %v", result.Error)
+	// result := database.DB.Create(user) // Store the result
+	// if result.Error != nil {
+	// 	log.Printf("Database error creating user: %v", result.Error)
 
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to create user",
-			"details": result.Error.Error(),
-		})
-		return
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{
+	// 		"error":   "Failed to create user",
+	// 		"details": result.Error.Error(),
+	// 	})
+	// }
+
+	newUser, err := userHandler.userManager.Create(userData)
+	 
+	if err != nil {
+		fmt.Println("failed to create a user")
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "User created successfully",
-		"userID":  user.ID,
-	})
+	ctx.JSON(http.StatusOK,newUser)
 }
