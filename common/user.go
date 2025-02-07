@@ -6,7 +6,7 @@ import (
 )
 
 type UserCreationInput struct {
-	FullName string `json:"full_name"`
+	FullName string `json:"fullname"`
 	// LastName          string `json:"last_name"`
 	Email string `json:"email"`
 	// Phone             string `json:"phone"`
@@ -14,8 +14,21 @@ type UserCreationInput struct {
 	// RegistrationToken string `json:"registration_token"`
 }
 
+type UserUpdationInput struct {
+	FullName string `json:"fullname"`
+	// LastName          string `json:"last_name"`
+	Email string `json:"email"`
+	// Phone             string `json:"phone"`
+	// Password          string `json:"password"` 
+	// RegistrationToken string `json:"registration_token"`
+}
+
 func NewUserCreationInput() *UserCreationInput {
 	return &UserCreationInput{}
+}
+
+func NewUserUpdationInput() *UserUpdationInput {
+	return &UserUpdationInput{}
 }
 
 type requestResponse struct {

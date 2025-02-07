@@ -13,15 +13,14 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	
 )
 
 type UserHandler struct {
 	groupName   string
-	userManager *managers.UserManager
+	userManager managers.UserManager
 }
 
-func NewUserHandlerFrom(userManager *managers.UserManager) *UserHandler {
+func NewUserHandlerFrom(userManager managers.UserManager) *UserHandler {
 	return &UserHandler{
 		"api/user",
 		userManager,
@@ -35,6 +34,7 @@ func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 	userGroup.GET("",userHandler.List)
 	userGroup.GET(":userid/",userHandler.Get)
 	userGroup.DELETE(":userid/",userHandler.Delete)
+	userGroup.PATCH(":userid/",userHandler.Update)
 }
 
 
@@ -49,7 +49,7 @@ func (userHandler *UserHandler) Create(ctx *gin.Context) {
 	fmt.Println(userData.Email)
 
 	if err!=nil{
-		
+
 		common.BadResponse(ctx, "Failed to bind data")
 	}
 
@@ -99,6 +99,41 @@ func (userHandler *UserHandler) Get(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK,allUser)
 }
+
+
+
+
+//Update the User
+
+func (userHandler *UserHandler) Update(ctx *gin.Context) {
+
+	userId , ok := ctx.Params.Get("userid")
+	 
+	if !ok{
+		fmt.Println("failed to fetch single user")
+	}
+
+	userUpdate := common.NewUserUpdationInput()
+
+	err := ctx.BindJSON(&userUpdate) //Binding the data
+
+	if err!=nil{
+		
+		common.BadResponse(ctx, "Failed to bind data")
+		return
+	}
+
+
+	user, err := userHandler.userManager.Update(userId, userUpdate)
+	 
+	if err != nil {
+		common.BadResponse(ctx, "failed to Update a user")
+		return
+	}
+
+	ctx.JSON(http.StatusOK,user)
+}
+
 
 
 //Deleting the user
