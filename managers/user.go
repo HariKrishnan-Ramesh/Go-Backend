@@ -45,6 +45,7 @@ func (userManager *userManager) Create(userData *common.UserCreationInput) (*mod
 	database.DB.Create(newUser)
 
 	if newUser.ID == 0 {
+		
 		return nil, errors.New("failed to create a new user")
 	}
 
