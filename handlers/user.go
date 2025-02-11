@@ -35,6 +35,7 @@ func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 	userGroup.GET(":userid/",userHandler.Get)
 	userGroup.DELETE(":userid/",userHandler.Delete)
 	userGroup.PATCH(":userid/",userHandler.Update)
+	userGroup.POST("/login",userHandler.Login)
 }
 
 
@@ -149,4 +150,31 @@ func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	
 	common.SuccessResponse(ctx , "Deleted user")
 
+}
+
+
+func (userHandler *UserHandler) Login(ctx *gin.Context) {
+
+	var loginInput common.LoginInput
+
+	if err := ctx.BindJSON(&loginInput) ; err != nil {
+		common.BadResponse(ctx, "Invalid login data")
+		return
+	}
+
+	user, token , err := userHandler.userManager.Login(loginInput.Email,loginInput.Password)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		common.BadResponse(ctx, "Invalid Credentials")
+		return
+	}
+
+	ctx.JSON(http.StatusOK,gin.H{
+		"message":  "Login successful",
+		"user_id":  user.ID,
+		"email":    user.Email,
+		"token":    token,
+		"username": user.FirstName,
+	})
 }
