@@ -45,9 +45,6 @@ func (userHandler *UserHandler) Create(ctx *gin.Context) {
 
 	err := ctx.BindJSON(&userData) //Binding the data
 
-	// fmt.Println(userData.FullName)
-	// fmt.Println(userData.Email)
-
 	if err!=nil{
 
 		common.BadResponse(ctx, "Failed to bind data")
@@ -99,7 +96,6 @@ func (userHandler *UserHandler) Get(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK,allUser)
 }
-
 
 
 
