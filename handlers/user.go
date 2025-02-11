@@ -45,8 +45,8 @@ func (userHandler *UserHandler) Create(ctx *gin.Context) {
 
 	err := ctx.BindJSON(&userData) //Binding the data
 
-	fmt.Println(userData.FullName)
-	fmt.Println(userData.Email)
+	// fmt.Println(userData.FullName)
+	// fmt.Println(userData.Email)
 
 	if err!=nil{
 

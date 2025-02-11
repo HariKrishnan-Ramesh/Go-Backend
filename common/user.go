@@ -6,21 +6,23 @@ import (
 )
 
 type UserCreationInput struct {
-	FullName string `json:"fullname"`
-	// LastName          string `json:"last_name"`
-	Email string `json:"email"`
-	// Phone             string `json:"phone"`
-	// Password          string `json:"password"`
-	// RegistrationToken string `json:"registration_token"`
+	
+	FirstName string         `json:"firstName"`
+	LastName  string         `json:"lastName"` 
+	Email     string         `json:"email"`
+	Phone     string          `json:"phone"`   
+	Password  string         `json:"password"`  
+	Token     string         `gorm:"uniqueIndex" json:"token"` 
 }
 
 type UserUpdationInput struct {
-	FullName string `json:"fullname"`
-	// LastName          string `json:"last_name"`
-	Email string `json:"email"`
-	// Phone             string `json:"phone"`
-	// Password          string `json:"password"` 
-	// RegistrationToken string `json:"registration_token"`
+
+	FirstName string         `json:"firstName"`
+	LastName  string         `json:"lastName"` 
+	Email     string         `json:"email"`
+	Phone     string          `json:"phone"`   
+	Password  string         `json:"password"`  
+	Token     string         `gorm:"uniqueIndex" json:"token"` 
 }
 
 func NewUserCreationInput() *UserCreationInput {
