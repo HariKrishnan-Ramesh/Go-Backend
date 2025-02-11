@@ -8,6 +8,7 @@ import (
 	"main/models"
 
 	"github.com/google/uuid" // Import the UUID package
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserManager interface {
@@ -16,6 +17,7 @@ type UserManager interface {
 	Get(id string) (models.User, error)
 	Update(userId string, userData *common.UserUpdationInput) (*models.User, error)
 	Delete(id string) (*models.User, error)
+	Login(email, password string) (*models.User, string, error)
 }
 
 type userManager struct {
@@ -42,14 +44,29 @@ func (userManager *userManager) Create(userData *common.UserCreationInput) (*mod
 		Phone:     userData.Phone,
 		Token:     uuidToken.String(), // Set the generated UUID as the token
 	}
-	database.DB.Create(newUser)
+
+	//Hash the password
+	hashedPassword , err := bcrypt.GenerateFromPassword([]byte(userData.Password),bcrypt.DefaultCost)
+	if err != nil{
+		return nil,fmt.Errorf("failed to hash the password: %w",err)
+	}
+
+	newUser.Password = string(hashedPassword)
+
+	result := database.DB.Create(newUser)
+	if result.Error != nil {
+		return nil,fmt.Errorf("failed to create a user: %w",result.Error)
+	}
 
 	if newUser.ID == 0 {
+		
 		return nil, errors.New("failed to create a new user")
 	}
 
 	return newUser, nil
 }
+
+
 
 // List All Users
 func (userManager *userManager) List() ([]models.User, error) {
@@ -60,6 +77,8 @@ func (userManager *userManager) List() ([]models.User, error) {
 	return users, nil
 }
 
+
+
 // Get Single User
 func (userManager *userManager) Get(id string) (models.User, error) {
 
@@ -69,32 +88,81 @@ func (userManager *userManager) Get(id string) (models.User, error) {
 	return user, nil
 }
 
+
+//Update the User
 func (userManager *userManager) Update(userId string, userData *common.UserUpdationInput) (*models.User, error) {
 
 	user := models.User{}
-
-	database.DB.First(&user, userId)
-
-	if user.ID == 0 {
-		fmt.Println("User is already deleted")
+	result := database.DB.First(&user, userId)
+	if result.Error != nil {
+		if errors.Is(result.Error, database.DB.Error) {
+			return nil, fmt.Errorf("user not found") // Indicate user not found
+		}
+		return nil, fmt.Errorf("failed to find user: %w", result.Error)
 	}
 
-	database.DB.Model(&user).Updates(models.User{
-		FirstName: userData.FirstName,
-		LastName:  userData.LastName,
-		Email:     userData.Email,
-		Password:  userData.Password,
-		Phone:     userData.Phone,
-	})
+	// Update fields
+	user.FirstName = userData.FirstName
+	user.LastName = userData.LastName
+	user.Email = userData.Email
+	user.Phone = userData.Phone
+
+	// Hash password if it's being updated
+	if userData.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userData.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, fmt.Errorf("failed to hash password: %w", err)
+		}
+		user.Password = string(hashedPassword)
+	}
+
+	result = database.DB.Save(&user)
+	if result.Error != nil {
+		return nil, fmt.Errorf("failed to update user: %w", result.Error)
+	}
 
 	return &user, nil
 }
 
+
+//Delete the User
 func (userManager *userManager) Delete(id string) (*models.User, error) {
 
 	user := &models.User{}
 	database.DB.Delete(user, id)
 
 	return user, nil
+}
+
+
+func (userManager *userManager) Login(email, password string) (*models.User, string, error) {
+
+	user := models.User{}
+	result := database.DB.Where("email = ?", email).First(&user)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, database.DB.Error) {
+			fmt.Println("Login: User not found for email:", email) // Debug log
+			return nil, "", errors.New("invalid credentials")
+		}
+		fmt.Println("Login: Database error:", result.Error) // Debug log
+		return nil, "", fmt.Errorf("failed to find user: %w", result.Error)
+	}
+
+	fmt.Println("Login: Email:", email)                                   // Debug
+	fmt.Println("Login: Stored Hashed Password:", user.Password)            // Debug
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) // Debug
+	if err != nil {
+		fmt.Println("Login: Password comparison error:", err) // Debug Log
+		return nil, "", errors.New("invalid credentials")
+	}
+
+	
+	token, err := common.GenerateJWT(user.Email)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to generate token: %w", err)
+	}
+
+	return &user, token, nil
 }
 

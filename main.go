@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"main/database"
 	"main/handlers"
 	"main/managers"
@@ -17,13 +18,14 @@ func main() {
 	database.Initialize()
 	log.Println("Database Initializing ended...")
 
-
 	userManager := managers.NewUserManager()
 	userHandler := handlers.NewUserHandlerFrom(userManager)
 
 	userHandler.RegisterUserApis(router)
 
-
-	
-	router.Run() // listen and serve on 0.0.0.0:8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default port
+	}
+	router.Run(":" + port)
 }
