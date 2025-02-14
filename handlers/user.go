@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
-	
 
 	// "log" // Import the log package
 	"main/common"
@@ -30,14 +30,53 @@ func NewUserHandlerFrom(userManager managers.UserManager) *UserHandler {
 //Grouping the apis according to the Operations
 func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 	userGroup := router.Group(userHandler.groupName)
+	userGroup.POST("/signup", userHandler.SignUp)
 	userGroup.POST("", userHandler.Create)
 	userGroup.GET("",userHandler.List)
 	userGroup.GET(":userid/",userHandler.Get)
 	userGroup.DELETE(":userid/",userHandler.Delete)
 	userGroup.PATCH(":userid/",userHandler.Update)
 	userGroup.POST("/login",userHandler.Login)
+
 }
 
+
+func (userHandler *UserHandler) SignUp(ctx *gin.Context){
+
+	//Calling data
+	userData := common.NewUserCreationInput()
+	//Bindind Data
+	if err := ctx.BindJSON(&userData) ; err != nil {
+		common.BadResponse(ctx,"Invalid signup data")
+		return
+	}
+
+	newUser , err := userHandler.userManager.Create(userData)
+	if err!=nil{
+		if errors.Is(err,managers.ErrEmailAlreadyExists){
+			common.BadResponse(ctx, "Email Already Exists")
+			return
+		}
+
+		common.InternalServerErrorResponse(ctx, "Failed to create a message")
+		return
+	}
+
+	token, err := common.GenerateJWT(newUser.Email)
+	if err != nil{
+		fmt.Println("Error generating token: ",err)
+		common.InternalServerErrorResponse(ctx, "Failed to Generate token")
+		return
+	}
+
+	common.SuccessResponseWithData(ctx, "Signup Successfull",gin.H{
+		"user_id" :newUser.ID,
+		"email":newUser.Email,
+		"username":newUser.FirstName,
+		"token":token,
+	})
+
+}
 
 //Creating the User Apis
 func (userHandler *UserHandler) Create(ctx *gin.Context) {
@@ -54,6 +93,11 @@ func (userHandler *UserHandler) Create(ctx *gin.Context) {
 	newUser, err := userHandler.userManager.Create(userData)
 	 
 	if err != nil {
+		// Handle specific errors from user creation (e.g., email already exists)
+		if errors.Is(err, managers.ErrEmailAlreadyExists) {
+			common.BadResponse(ctx, "Email already exists")
+			return
+		}
 		common.BadResponse(ctx, "failed to create a user")
 	}
 
@@ -151,6 +195,7 @@ func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	common.SuccessResponse(ctx , "Deleted user")
 
 }
+
 
 
 func (userHandler *UserHandler) Login(ctx *gin.Context) {

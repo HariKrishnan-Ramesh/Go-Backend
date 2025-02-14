@@ -7,8 +7,13 @@ import (
 	"main/database"
 	"main/models"
 
-	"github.com/google/uuid" // Import the UUID package
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+)
+
+var (
+	ErrEmailAlreadyExists = errors.New("email already exists")
 )
 
 type UserManager interface {
@@ -30,6 +35,17 @@ func NewUserManager() UserManager {
 
 // Create New User
 func (userManager *userManager) Create(userData *common.UserCreationInput) (*models.User, error) {
+
+	var existingemail models.User
+	value := database.DB.Where("email = ?",userData.Email).First(&existingemail)
+	if !errors.Is(value.Error, gorm.ErrRecordNotFound){
+		if value.Error == nil {
+			return nil,ErrEmailAlreadyExists
+		}
+		return nil, fmt.Errorf("failed to check email existence %w",value.Error)
+	}
+
+
 	// Generate a UUID for the token
 	uuidToken, err := uuid.NewUUID()
 	if err != nil {
