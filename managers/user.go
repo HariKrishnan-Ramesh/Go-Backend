@@ -23,6 +23,7 @@ type UserManager interface {
 	Update(userId string, userData *common.UserUpdationInput) (*models.User, error)
 	Delete(id string) (*models.User, error)
 	Login(email, password string) (*models.User, string, error)
+	Logout(token string) error
 }
 
 type userManager struct {
@@ -179,6 +180,39 @@ func (userManager *userManager) Login(email, password string) (*models.User, str
 		return nil, "", fmt.Errorf("failed to generate token: %w", err)
 	}
 
+	user.Token = token
+	result = database.DB.Save(&user)
+	if result.Error != nil{
+		fmt.Println("Login:Failed to save token to database:",result.Error)
+		return nil,"",fmt.Errorf("failed to save token: %w",result.Error)
+	}
+
 	return &user, token, nil
 }
 
+func (userManager *userManager) Logout(token string) error {
+	var user models.User
+
+	result := database.DB.Where("token = ?", token).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return errors.New("invalid token") // Token Not Found
+		}
+
+		return fmt.Errorf("failed to find user by token : %w", result.Error)
+	}
+
+	// Generate a unique invalidation token
+	invalidatedToken, err := uuid.NewUUID()
+	if err != nil {
+		return fmt.Errorf("failed to generate invalidation token: %w", err)
+	}
+	user.Token = invalidatedToken.String() // Set the token to the new, unique value
+
+	result = database.DB.Save(&user)
+	if result.Error != nil {
+		return fmt.Errorf("failed to invalidate token: %w", result.Error)
+	}
+
+	return nil
+}

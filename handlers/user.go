@@ -37,6 +37,7 @@ func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 	userGroup.DELETE(":userid/",userHandler.Delete)
 	userGroup.PATCH(":userid/",userHandler.Update)
 	userGroup.POST("/login",userHandler.Login)
+	userGroup.POST("/logout",userHandler.Logout)
 
 }
 
@@ -215,6 +216,8 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
+	fmt.Println("Login: Token from login API:",token)//For checking the unique token is sam or not
+
 	ctx.JSON(http.StatusOK,gin.H{
 		"message":  "Login successful",
 		"user_id":  user.ID,
@@ -222,4 +225,28 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		"token":    token,
 		"username": user.FirstName,
 	})
+}
+
+
+func (userHandler *UserHandler) Logout(ctx *gin.Context) {
+	var logoutInput common.LogoutInput
+
+	if err := ctx.BindJSON(&logoutInput) ; err != nil {
+		common.BadResponse(ctx, "Invalid logout data")
+		return
+	}
+
+	fmt.Println("Logout :Token received by Logout API:",logoutInput.Token)//For checking the unique token is sam or not
+
+	err := userHandler.userManager.Logout(logoutInput.Token)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		common.BadResponse(ctx, "Logout Failed")
+		return
+	}
+
+	common.SuccessResponse(ctx, "Logout successfull")
+
+
 }

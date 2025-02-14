@@ -36,6 +36,10 @@ type AuthResponse struct {
 	Message string `json:"message"`
 }
 
+type LogoutInput struct{
+	Token string `json:"token" binding:"required"`
+}
+
 func NewUserCreationInput() *UserCreationInput {
 	return &UserCreationInput{}
 }
