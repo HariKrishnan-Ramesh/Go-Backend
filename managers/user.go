@@ -59,7 +59,7 @@ func (userManager *userManager) Create(userData *common.UserCreationInput) (*mod
 		Email:     userData.Email,
 		Password:  userData.Password,
 		Phone:     userData.Phone,
-		Token:     uuidToken.String(), // Set the generated UUID as the token
+		Token:     uuidToken.String(), 
 	}
 
 	//Hash the password
