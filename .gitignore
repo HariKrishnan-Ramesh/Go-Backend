@@ -1,0 +1,27 @@
+# Compiled binaries
+*.exe
+*.dll
+*.so
+*.o
+*.a
+
+# Dependencies
+/vendor
+/node_modules
+/venv
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.DS_Store
+
+# Operating System files
+Thumbs.db
+
+# Log files
+*.log
+
+# Environment variables
+.env
