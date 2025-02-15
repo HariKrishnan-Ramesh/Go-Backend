@@ -94,7 +94,7 @@ func (userHandler *UserHandler) Create(ctx *gin.Context) {
 	newUser, err := userHandler.userManager.Create(userData)
 	 
 	if err != nil {
-		// Handle specific errors from user creation (e.g., email already exists)
+		
 		if errors.Is(err, managers.ErrEmailAlreadyExists) {
 			common.BadResponse(ctx, "Email already exists")
 			return
@@ -216,7 +216,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("Login: Token from login API:",token)//For checking the unique token is sam or not
+	fmt.Println("Login: Token from login API:",token)
 
 	ctx.JSON(http.StatusOK,gin.H{
 		"message":  "Login successful",
@@ -236,8 +236,7 @@ func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("Logout :Token received by Logout API:",logoutInput.Token)//For checking the unique token is sam or not
-
+	fmt.Println("Logout :Token received by Logout API:",logoutInput.Token)
 	err := userHandler.userManager.Logout(logoutInput.Token)
 
 	if err != nil {
