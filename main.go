@@ -31,7 +31,8 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // Default port
+		port =  os.Getenv("PORT")
+		log.Fatalf("Listening on the port %w",port)		
 	}
 	router.Run(":" + port)
 }
