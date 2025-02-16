@@ -152,6 +152,7 @@ func (userManager *userManager) Delete(id string) (*models.User, error) {
 }
 
 
+//Login user Function
 func (userManager *userManager) Login(email, password string) (*models.User, string, error) {
 
 	user := models.User{}
@@ -190,6 +191,7 @@ func (userManager *userManager) Login(email, password string) (*models.User, str
 	return &user, token, nil
 }
 
+//Logout User Function
 func (userManager *userManager) Logout(token string) error {
 	var user models.User
 

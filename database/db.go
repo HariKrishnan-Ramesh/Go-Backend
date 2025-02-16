@@ -22,6 +22,8 @@ func Initialize() {
 	dbName := os.Getenv("DB_NAME")
 	dbPort := os.Getenv("DB_PORT")
 
+	//log.Fatalf("Connection established %w",dbUser) Like this {other functions also printed} can be used to DEBUG to know the connection established is correct or not.
+
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 	log.Printf("DSN: %s", dsn) //This line is for debugging
 
@@ -35,9 +37,9 @@ func Initialize() {
 	err = DB.AutoMigrate(&models.User{})
 	if err != nil {
 		log.Fatalf("Failed to auto-migrate database: %v", err)
-		panic("Failed to Automigrate database")
+		panic("Failed to Automigrate database")//Helps to create the Tables automatically according to our needs
 	}
 
-	log.Println("Database connection established and auto-migration complete.")
+	log.Println("Database connection established and auto-migration complete.")//For Debugging purpose , everything ok
 
 }

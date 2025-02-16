@@ -198,7 +198,7 @@ func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 }
 
 
-
+//Login User Function 
 func (userHandler *UserHandler) Login(ctx *gin.Context) {
 
 	var loginInput common.LoginInput
@@ -228,6 +228,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 }
 
 
+//Logout User Function
 func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 	var logoutInput common.LogoutInput
 
