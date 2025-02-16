@@ -13,5 +13,5 @@ type User struct {
 	Email     string         `json:"email"`
 	Password  string         `json:"password"`  
 	Phone     string         `json:"phone"`   
-	Token     string         `gorm:"uniqueIndex" json:"-"` 
+	Token     string         `gorm:"uniqueIndex:idx_users_token,length:191" json:"-"` 
 }

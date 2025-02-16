@@ -8,11 +8,17 @@ import (
 	"main/managers"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 
 func main() {
 	router := gin.Default()
+
+	err := godotenv.Load()
+    if err != nil {
+        log.Fatalf("Error loading .env file: %v", err)
+    }
 
 	log.Println("Database Initializing started...")
 	database.Initialize()
@@ -25,7 +31,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "PORT" // Default port
+		port = "8080" // Default port
 	}
 	router.Run(":" + port)
 }
