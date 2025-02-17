@@ -23,7 +23,9 @@ type UserUpdationInput struct {
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`
 	Password  string `json:"password"`
-	Token     string `gorm:"uniqueIndex" json:"token"` 
+	Token     string `gorm:"uniqueIndex" json:"token"`
+	Toke    string `gorm:"uniqueIndex" json:"token"`
+	Tok     string `gorm:"uniqueIndex" json:"token"`
 }
 
 type LoginInput struct {
