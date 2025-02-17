@@ -32,7 +32,6 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port =  os.Getenv("PORT")
-		log.Fatalf("Listening on the port %w",port)		
 	}
 	router.Run(":" + port)
 }

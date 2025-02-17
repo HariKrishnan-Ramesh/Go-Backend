@@ -36,8 +36,22 @@ type AuthResponse struct {
 	Message string `json:"message"`
 }
 
-type LogoutInput struct{
+type LogoutInput struct {
 	Token string `json:"token" binding:"required"`
+}
+
+type requestResponse struct {
+	Message string      `json:"message"`
+	Status  uint        `json:"status"`
+	Data    interface{} `json:"data,omitempty"`
+}
+
+type ProfileResponse struct {
+	ID        uint   `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
 }
 
 func NewUserCreationInput() *UserCreationInput {
@@ -46,12 +60,6 @@ func NewUserCreationInput() *UserCreationInput {
 
 func NewUserUpdationInput() *UserUpdationInput {
 	return &UserUpdationInput{}
-}
-
-type requestResponse struct {
-	Message string      `json:"message"`
-	Status  uint        `json:"status"`
-	Data    interface{} `json:"data,omitempty"`
 }
 
 func SuccessResponse(ctx *gin.Context, msg string) {
