@@ -14,6 +14,7 @@ import (
 
 var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
+	ErrInvalidToken = errors.New("invalid token")
 )
 
 type UserManager interface {
@@ -24,6 +25,7 @@ type UserManager interface {
 	Delete(id string) (*models.User, error)
 	Login(email, password string) (*models.User, string, error)
 	Logout(token string) error
+	ViewProfile(email string) (*common.ProfileResponse, error)
 }
 
 type userManager struct {
@@ -152,6 +154,7 @@ func (userManager *userManager) Delete(id string) (*models.User, error) {
 }
 
 
+//Login user Function
 func (userManager *userManager) Login(email, password string) (*models.User, string, error) {
 
 	user := models.User{}
@@ -190,6 +193,7 @@ func (userManager *userManager) Login(email, password string) (*models.User, str
 	return &user, token, nil
 }
 
+//Logout User Function
 func (userManager *userManager) Logout(token string) error {
 	var user models.User
 
@@ -215,4 +219,28 @@ func (userManager *userManager) Logout(token string) error {
 	}
 
 	return nil
+}
+
+
+//View Profile
+func (userManager *userManager) ViewProfile(email string) (*common.ProfileResponse, error) {
+	user := models.User{}
+	result := database.DB.Where("email=?",email).First(&user)
+
+	if result.Error != nil {
+		if errors.Is(result.Error,gorm.ErrRecordNotFound){
+			return nil, errors.New("user not found")
+		}
+		return nil, fmt.Errorf("failed to find user: %w", result.Error)
+	}
+
+	profile := &common.ProfileResponse{
+		ID : user.ID,
+		FirstName: user.FirstName,
+		LastName: user.LastName,
+		Email: user.Email,
+		Phone: user.Phone,
+	}
+
+	return profile,nil
 }
