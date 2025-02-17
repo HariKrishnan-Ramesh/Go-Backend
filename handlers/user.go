@@ -43,8 +43,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		tokenString := strings.Replace(authHeader, "Bearer", "", 1)
-		tokenString = strings.TrimSpace(tokenString)
-		log.Println("Token String:", tokenString) // Log the token after removing "Bearer"
+		// tokenString = strings.TrimSpace(tokenString)
+		// log.Println("Token String:", tokenString) // Log the token after removing "Bearer"
 
 		if _, exists := tokenBlacklist.Load(tokenString); exists {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Token has been logged out"})
