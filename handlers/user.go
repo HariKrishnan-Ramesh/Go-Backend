@@ -186,7 +186,6 @@ func (userHandler *UserHandler) Get(ctx *gin.Context) {
 }
 
 //Update the User
-
 func (userHandler *UserHandler) Update(ctx *gin.Context) {
 
 	userId, ok := ctx.Params.Get("userid")
