@@ -5,13 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
-	// "log" // Import the log package
 	"main/common"
 	"sync"
-	// "main/database"
 	"main/managers"
-	// "main/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"log"
@@ -44,7 +40,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		tokenString := strings.Replace(authHeader, "Bearer", "", 1)
 		tokenString = strings.TrimSpace(tokenString)
-		log.Println("Token String:", tokenString) // Log the token after removing "Bearer"
+		log.Println("Token String:", tokenString)
 
 		if _, exists := tokenBlacklist.Load(tokenString); exists {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Token has been logged out"})
@@ -89,9 +85,7 @@ func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 
 func (userHandler *UserHandler) SignUp(ctx *gin.Context) {
 
-	//Calling data
 	userData := common.NewUserCreationInput()
-	//Bindind Data
 	if err := ctx.BindJSON(&userData); err != nil {
 		common.BadResponse(ctx, "Invalid signup data")
 		return
@@ -120,6 +114,8 @@ func (userHandler *UserHandler) SignUp(ctx *gin.Context) {
 		"email":    newUser.Email,
 		"username": newUser.FirstName,
 		"token":    token,
+		"address":  newUser.Address,
+		"image":    newUser.Image,
 	})
 
 }
@@ -185,7 +181,7 @@ func (userHandler *UserHandler) Get(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, allUser)
 }
 
-//Update the User
+// Update the User
 func (userHandler *UserHandler) Update(ctx *gin.Context) {
 
 	userId, ok := ctx.Params.Get("userid")
@@ -271,7 +267,6 @@ func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 		return
 	}
 
-	// Add token to the blacklist:
 	tokenBlacklist.Store(logoutInput.Token, true)
 
 	fmt.Println("Logout :Token received by Logout API:", logoutInput.Token)

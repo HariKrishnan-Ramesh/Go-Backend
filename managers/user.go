@@ -14,7 +14,7 @@ import (
 
 var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
-	ErrInvalidToken = errors.New("invalid token")
+	ErrInvalidToken       = errors.New("invalid token")
 )
 
 type UserManager interface {
@@ -40,14 +40,13 @@ func NewUserManager() UserManager {
 func (userManager *userManager) Create(userData *common.UserCreationInput) (*models.User, error) {
 
 	var existingemail models.User
-	value := database.DB.Where("email = ?",userData.Email).First(&existingemail)
-	if !errors.Is(value.Error, gorm.ErrRecordNotFound){
+	value := database.DB.Where("email = ?", userData.Email).First(&existingemail)
+	if !errors.Is(value.Error, gorm.ErrRecordNotFound) {
 		if value.Error == nil {
-			return nil,ErrEmailAlreadyExists
+			return nil, ErrEmailAlreadyExists
 		}
-		return nil, fmt.Errorf("failed to check email existence %w",value.Error)
+		return nil, fmt.Errorf("failed to check email existence %w", value.Error)
 	}
-
 
 	// Generate a UUID for the token
 	uuidToken, err := uuid.NewUUID()
@@ -61,31 +60,31 @@ func (userManager *userManager) Create(userData *common.UserCreationInput) (*mod
 		Email:     userData.Email,
 		Password:  userData.Password,
 		Phone:     userData.Phone,
-		Token:     uuidToken.String(), 
+		Token:     uuidToken.String(),
+		Address:   models.Address(userData.Address),
+		Image:     userData.Image,
 	}
 
 	//Hash the password
-	hashedPassword , err := bcrypt.GenerateFromPassword([]byte(userData.Password),bcrypt.DefaultCost)
-	if err != nil{
-		return nil,fmt.Errorf("failed to hash the password: %w",err)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userData.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash the password: %w", err)
 	}
 
 	newUser.Password = string(hashedPassword)
 
 	result := database.DB.Create(newUser)
 	if result.Error != nil {
-		return nil,fmt.Errorf("failed to create a user: %w",result.Error)
+		return nil, fmt.Errorf("failed to create a user: %w", result.Error)
 	}
 
 	if newUser.ID == 0 {
-		
+
 		return nil, errors.New("failed to create a new user")
 	}
 
 	return newUser, nil
 }
-
-
 
 // List All Users
 func (userManager *userManager) List() ([]models.User, error) {
@@ -96,8 +95,6 @@ func (userManager *userManager) List() ([]models.User, error) {
 	return users, nil
 }
 
-
-
 // Get Single User
 func (userManager *userManager) Get(id string) (models.User, error) {
 
@@ -107,8 +104,7 @@ func (userManager *userManager) Get(id string) (models.User, error) {
 	return user, nil
 }
 
-
-//Update the User
+// Update the User
 func (userManager *userManager) Update(userId string, userData *common.UserUpdationInput) (*models.User, error) {
 
 	user := models.User{}
@@ -125,6 +121,8 @@ func (userManager *userManager) Update(userId string, userData *common.UserUpdat
 	user.LastName = userData.LastName
 	user.Email = userData.Email
 	user.Phone = userData.Phone
+	user.Address = models.Address(userData.Address)
+	user.Image = userData.Image
 
 	// Hash password if it's being updated
 	if userData.Password != "" {
@@ -143,8 +141,7 @@ func (userManager *userManager) Update(userId string, userData *common.UserUpdat
 	return &user, nil
 }
 
-
-//Delete the User
+// Delete the User
 func (userManager *userManager) Delete(id string) (*models.User, error) {
 
 	user := &models.User{}
@@ -153,8 +150,7 @@ func (userManager *userManager) Delete(id string) (*models.User, error) {
 	return user, nil
 }
 
-
-//Login user Function
+// Login user Function
 func (userManager *userManager) Login(email, password string) (*models.User, string, error) {
 
 	user := models.User{}
@@ -169,15 +165,14 @@ func (userManager *userManager) Login(email, password string) (*models.User, str
 		return nil, "", fmt.Errorf("failed to find user: %w", result.Error)
 	}
 
-	fmt.Println("Login: Email:", email)                                   // Debug
-	fmt.Println("Login: Stored Hashed Password:", user.Password)            // Debug
+	fmt.Println("Login: Email:", email)                                           // Debug
+	fmt.Println("Login: Stored Hashed Password:", user.Password)                  // Debug
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) // Debug
 	if err != nil {
 		fmt.Println("Login: Password comparison error:", err) // Debug Log
 		return nil, "", errors.New("invalid credentials")
 	}
 
-	
 	token, err := common.GenerateJWT(user.Email)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to generate token: %w", err)
@@ -185,15 +180,15 @@ func (userManager *userManager) Login(email, password string) (*models.User, str
 
 	user.Token = token
 	result = database.DB.Save(&user)
-	if result.Error != nil{
-		fmt.Println("Login:Failed to save token to database:",result.Error)
-		return nil,"",fmt.Errorf("failed to save token: %w",result.Error)
+	if result.Error != nil {
+		fmt.Println("Login:Failed to save token to database:", result.Error)
+		return nil, "", fmt.Errorf("failed to save token: %w", result.Error)
 	}
 
 	return &user, token, nil
 }
 
-//Logout User Function
+// Logout User Function
 func (userManager *userManager) Logout(token string) error {
 	var user models.User
 
@@ -221,26 +216,27 @@ func (userManager *userManager) Logout(token string) error {
 	return nil
 }
 
-
-//View Profile
+// View Profile
 func (userManager *userManager) ViewProfile(email string) (*common.ProfileResponse, error) {
 	user := models.User{}
-	result := database.DB.Where("email=?",email).First(&user)
+	result := database.DB.Where("email=?", email).First(&user)
 
 	if result.Error != nil {
-		if errors.Is(result.Error,gorm.ErrRecordNotFound){
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")
 		}
 		return nil, fmt.Errorf("failed to find user: %w", result.Error)
 	}
 
 	profile := &common.ProfileResponse{
-		ID : user.ID,
+		ID:        user.ID,
 		FirstName: user.FirstName,
-		LastName: user.LastName,
-		Email: user.Email,
-		Phone: user.Phone,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Phone:     user.Phone,
+		Address:   common.Address(user.Address),
+		Image:     user.Image,
 	}
 
-	return profile,nil
+	return profile, nil
 }

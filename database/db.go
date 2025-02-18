@@ -37,9 +37,9 @@ func Initialize() {
 	err = DB.AutoMigrate(&models.User{})
 	if err != nil {
 		log.Fatalf("Failed to auto-migrate database: %v", err)
-		panic("Failed to Automigrate database")//Helps to create the Tables automatically according to our needs
+		panic("Failed to Automigrate database")
 	}
 
-	log.Println("Database connection established and auto-migration complete.")//For Debugging purpose , everything ok
+	log.Println("Database connection established and auto-migration complete.")
 
 }
