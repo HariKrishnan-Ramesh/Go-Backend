@@ -8,22 +8,36 @@ import (
 	"time"
 )
 
+type Address struct {
+	Address1 string `json:"address1"`
+	Address2 string `json:"address2,omitempty"`
+	City     string `json:"city"`
+	District string `json:"district,omitempty"`
+	State    string `json:"state"`
+	Country  string `json:"country"`
+	Pin      string `json:"pin"`
+}
+
 type UserCreationInput struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email" binding:"required"`
-	Phone     string `json:"phone"`
-	Password  string `json:"password" binding:"required"`
-	Token     string `gorm:"uniqueIndex" json:"token"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	Email     string  `json:"email" binding:"required"`
+	Phone     string  `json:"phone"`
+	Password  string  `json:"password" binding:"required"`
+	Token     string  `gorm:"uniqueIndex" json:"token"`
+	Address   Address `json:"address"`
+	Image     string  `json:"image,omitempty"`
 }
 
 type UserUpdationInput struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email"`
-	Phone     string `json:"phone"`
-	Password  string `json:"password"`
-	Token     string `gorm:"uniqueIndex" json:"token"` 
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	Email     string  `json:"email"`
+	Phone     string  `json:"phone"`
+	Password  string  `json:"password"`
+	Token     string  `gorm:"uniqueIndex" json:"token"`
+	Address   Address `json:"address"`
+	Image     string  `json:"image,omitempty"`
 }
 
 type LoginInput struct {
@@ -47,11 +61,13 @@ type requestResponse struct {
 }
 
 type ProfileResponse struct {
-	ID        uint   `json:"id"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email"`
-	Phone     string `json:"phone"`
+	ID        uint    `json:"id"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	Email     string  `json:"email"`
+	Phone     string  `json:"phone"`
+	Address   Address `json:"address"`
+	Image     string  `json:"image,omitempty"`
 }
 
 func NewUserCreationInput() *UserCreationInput {
