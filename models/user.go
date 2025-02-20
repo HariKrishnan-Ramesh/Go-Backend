@@ -25,3 +25,13 @@ type User struct {
 	Address   Address `json:"address" gorm:"embedded"`
 	Image     string  `json:"image,omitempty"`
 }
+
+type Product struct {
+	gorm.Model
+	SKU         string `json:"sku" gorm:"uniqueIndex"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
+	Image       string `json:"image,omitempty"`
+	CategoryID  uint   `json:"categoryID"`
+}
