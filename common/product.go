@@ -12,7 +12,7 @@ type ProductCreationInput struct {
 
 
 type ProductUpdationInput struct {
-	SKU         string `json:"sku"`
+	SKU         string `json:"sku" gorm:"uniqueIndex"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       string `json:"price"`

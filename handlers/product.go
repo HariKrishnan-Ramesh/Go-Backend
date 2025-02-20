@@ -3,6 +3,7 @@ package handlers
 import (
 	"main/common"
 	"main/managers"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,9 @@ func (productHandler *ProductHandler) RegisterUserApis(router *gin.Engine){
 	productGroup := router.Group(productHandler.groupName)
 	productGroup.POST("",productHandler.Create)
 	productGroup.GET("",productHandler.List)
+	productGroup.GET(":productid/",productHandler.Get)
+	productGroup.PATCH(":productid/",productHandler.Update)
+	productGroup.DELETE(":productid/",productHandler.Delete)
 }
 
 func (productHandler *ProductHandler) Create(ctx *gin.Context) {
@@ -60,7 +64,7 @@ func (productHandler *ProductHandler) List(ctx *gin.Context){
 
 }
 
-//Get single Item by list
+//Get single Item by ID
 func (productHandler *ProductHandler) Get(ctx *gin.Context){
 	productID, ok := ctx.Params.Get("productid")
 	if !ok {
@@ -83,4 +87,45 @@ func (productHandler *ProductHandler) Get(ctx *gin.Context){
 }
 
 
+//Update a product
+func (productHandler *ProductHandler) Update(ctx *gin.Context) {
+	productID, ok := ctx.Params.Get("productid")
+	if !ok {
+		common.BadResponse(ctx,"Product ID is required")
+		return
+	}
+
+	productUpdateData := common.NewProductUpdationInput()
+	if err := ctx.BindJSON(&productUpdateData) ; err != nil {
+		common.InternalServerErrorResponse(ctx,"Failed to update Product")
+		return
+	}
+
+	updatedProduct, err := productHandler.productManager.Update(productID,productUpdateData)
+	if err != nil {
+		common.InternalServerErrorResponse(ctx, "Failed to update product")
+		return
+	}
+
+	common.SuccessResponseWithData(ctx, "Product updated successfully", updatedProduct)
+	ctx.JSON(http.StatusOK,updatedProduct)
+}
+
+
+//Delete a data
+func (productHandler *ProductHandler) Delete(ctx *gin.Context) {
+	productID, ok := ctx.Params.Get("productid")
+	if !ok {
+		common.BadResponse(ctx, "Product ID is required")
+		return
+	}
+
+	err :=productHandler.productManager.Delete(productID)
+	if err != nil {
+		common.InternalServerErrorResponse(ctx, "Failed to delete product")
+		return
+	}
+
+	common.SuccessResponse(ctx, "Product deleted successfully")
+}
 
