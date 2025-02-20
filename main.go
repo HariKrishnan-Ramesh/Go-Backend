@@ -26,8 +26,11 @@ func main() {
 
 	userManager := managers.NewUserManager()
 	userHandler := handlers.NewUserHandlerFrom(userManager)
-
 	userHandler.RegisterUserApis(router)
+
+	productManager := managers.NewProductManager()
+	productHandler := handlers.NewProductHandler(productManager)
+	productHandler.RegisterUserApis(router)
 
 	port := os.Getenv("PORT")
 	if port == "" {

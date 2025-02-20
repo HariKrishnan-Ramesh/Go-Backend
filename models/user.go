@@ -28,7 +28,7 @@ type User struct {
 
 type Product struct {
 	gorm.Model
-	SKU         string `json:"sku" gorm:"uniqueIndex"`
+	SKU         string `json:"sku" gorm:"uniqueIndex:idx_products_sku,length:191"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       string `json:"price"`

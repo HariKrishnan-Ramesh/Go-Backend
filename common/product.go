@@ -1,10 +1,8 @@
 package common
 
 
-
-
 type ProductCreationInput struct {
-	SKU         string `json:"sku"`
+	SKU         string `json:"sku" gorm:"uniqueIndex"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       string `json:"price"`
@@ -14,7 +12,7 @@ type ProductCreationInput struct {
 
 
 type ProductUpdationInput struct {
-	SKU         string `json:"sku" gorm:"uniqueIndex"`
+	SKU         string `json:"sku"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       string `json:"price"`
