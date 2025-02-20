@@ -3,15 +3,15 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"os"
-	"strings"
-	"main/common"
-	"sync"
-	"main/managers"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"log"
+	"main/common"
+	"main/managers"
 	"net/http"
+	"os"
+	"strings"
+	"sync"
 )
 
 type UserHandler struct {
