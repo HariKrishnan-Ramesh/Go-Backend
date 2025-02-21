@@ -78,7 +78,7 @@ func (userManager *userManager) Create(userData *common.UserCreationInput) (*mod
 		return nil, fmt.Errorf("failed to create a user: %w", result.Error)
 	}
 
-	if newUser.ID == 0 {
+	if newUser.Id == 0 {
 
 		return nil, errors.New("failed to create a new user")
 	}
@@ -229,7 +229,7 @@ func (userManager *userManager) ViewProfile(email string) (*common.ProfileRespon
 	}
 
 	profile := &common.ProfileResponse{
-		ID:        user.ID,
+		Id:        user.Id,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,

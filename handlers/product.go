@@ -78,7 +78,7 @@ func (productHandler *ProductHandler) Get(ctx *gin.Context){
 		return
 	}
 
-	if product.ID == 0 {
+	if product.Id == 0 {
 		common.BadResponse(ctx, "Product Not Found")
 		return
 	}

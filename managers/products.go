@@ -176,5 +176,5 @@ func (productManager *productManager) GetLastProductID() (int, error) {
 		}
 		return 0, fmt.Errorf("failed to get last product: %w", result.Error)
 	}
-	return int(product.ID), nil
+	return int(product.Id), nil
 }

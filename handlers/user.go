@@ -110,7 +110,7 @@ func (userHandler *UserHandler) SignUp(ctx *gin.Context) {
 	}
 
 	common.SuccessResponseWithData(ctx, "Signup Successfull", gin.H{
-		"user_id":  newUser.ID,
+		"user_id":  newUser.Id,
 		"email":    newUser.Email,
 		"username": newUser.FirstName,
 		"token":    token,
@@ -168,7 +168,7 @@ func (userHandler *UserHandler) Get(ctx *gin.Context) {
 
 	allUser, err := userHandler.userManager.Get(detailUser)
 
-	if allUser.ID == 0 {
+	if allUser.Id == 0 {
 		common.BadResponse(ctx, "User is already deleted")
 
 		return
@@ -251,7 +251,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message":  "Login successful",
-		"user_id":  user.ID,
+		"user_id":  user.Id,
 		"email":    user.Email,
 		"token":    token,
 		"username": user.FirstName,

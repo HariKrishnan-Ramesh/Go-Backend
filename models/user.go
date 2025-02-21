@@ -2,6 +2,7 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type Address struct {
@@ -15,7 +16,11 @@ type Address struct {
 }
 
 type User struct {
-	gorm.Model
+	//gorm.Model
+	Id       uint `gorm:"primarykey"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:""`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	FirstName string  `json:"firstName"`
 	LastName  string  `json:"lastName"`
 	Email     string  `json:"email"`
@@ -27,7 +32,11 @@ type User struct {
 }
 
 type Product struct {
-	gorm.Model
+	//gorm.Model
+	Id       uint `gorm:"primarykey"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:""`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	SKU         string `json:"sku" gorm:"uniqueIndex:idx_products_sku,length:191"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
