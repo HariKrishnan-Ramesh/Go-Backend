@@ -143,6 +143,11 @@ func (productManager *productManager) SeedProducts(count int) error {
 		return err //Handle appropriately
 	}
 
+	//  var categories []models.Category
+	//  result := database.DB.Find(&categories)
+	//  if result.Error != nil {
+	// 	fmt.Printf("Error getting categories for seeding %v\n",)
+	//  }
 
 	for i:=0; i<count; i++ {
 		nextProductID := lastProductID + i +1
