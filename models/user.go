@@ -44,3 +44,12 @@ type Product struct {
 	Image       string `json:"image,omitempty"`
 	CategoryID  uint   `json:"categoryID"`
 }
+
+type Category struct {
+	Id uint `gorm:"primary"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:""`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	Name string `json:"name"`
+	Description string `json:"description"`
+}
