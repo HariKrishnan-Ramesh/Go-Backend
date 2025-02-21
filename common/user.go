@@ -61,7 +61,7 @@ type requestResponse struct {
 }
 
 type ProfileResponse struct {
-	ID        uint    `json:"id"`
+	Id        uint    `json:"id"`
 	FirstName string  `json:"firstName"`
 	LastName  string  `json:"lastName"`
 	Email     string  `json:"email"`

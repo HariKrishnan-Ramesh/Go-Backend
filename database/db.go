@@ -5,9 +5,7 @@ import (
 	"log"
 	"main/models"
 	"os"
-
 	"gorm.io/driver/mysql"
-	// "gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
