@@ -34,6 +34,11 @@ func main() {
 	productHandler.RegisterUserApis(router)
 
 
+	if err := productManager.SeedCategories(); err != nil {
+		log.Fatalf("Failed to seed categories: %v", err)
+	}
+	log.Println("Successfully seeded categories.")
+
 	// Seed products
 	seedCountStr := os.Getenv("SEED_PRODUCT_COUNT")
 	seedCount := 100
