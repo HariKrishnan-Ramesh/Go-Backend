@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+	"strings"
 )
 
 type ProductManager interface {
@@ -19,6 +20,7 @@ type ProductManager interface {
 	GenerateSKU() string
 	SeedProducts(count int) error
 	GetLastProductID() (int, error)
+	SeedCategories() error
 }
 
 type productManager struct {
@@ -128,12 +130,11 @@ func (productManager *productManager) GenerateSKU() string {
 	dateString := now.Format("20250102")
 
 	randomNumber := rand.Intn(100000)
-	randomNumberString := fmt.Sprintf("%04d",randomNumber)
+	randomNumberString := fmt.Sprintf("%04d", randomNumber)
 
-	sku := fmt.Sprintf("PROD-%s-%s",dateString,randomNumberString)
+	sku := fmt.Sprintf("PROD-%s-%s", dateString, randomNumberString)
 	return sku
 }
-
 
 func (productManager *productManager) SeedProducts(count int) error {
 
@@ -143,34 +144,71 @@ func (productManager *productManager) SeedProducts(count int) error {
 		return err //Handle appropriately
 	}
 
-	//  var categories []models.Category
-	//  result := database.DB.Find(&categories)
-	//  if result.Error != nil {
-	// 	fmt.Printf("Error getting categories for seeding %v\n",)
-	//  }
+	var categories []models.Category
+	result := database.DB.Find(&categories)
+	if result.Error != nil {
+		fmt.Printf("Error getting categories for seeding %v\n", err)
+		return err
+	}
 
-	for i:=0; i<count; i++ {
-		nextProductID := lastProductID + i +1
-		sku := productManager.GenerateSKU()
+	if len(categories) == 0 {
+		fmt.Println("No categories found.")
+		return fmt.Errorf("no categories to associate with products")
+	}
+
+	for i := 0; i < count; i++ {
+		nextProductID := lastProductID + i + 1
+		//sku := productManager.GenerateSKU()
+
+		randomCategory := categories[rand.Intn(len(categories))]
+
 		productData := &common.ProductCreationInput{
-			SKU : sku,
-			Name : fmt.Sprintf("Product %d",nextProductID ),
+			//SKU:         sku,
+			Name:        fmt.Sprintf("Product %d", nextProductID),
 			Description: "Generated Product",
-			Price : strconv.FormatFloat(float64(rand.Intn(100000))/100.0,'f',2,64),
-			CategoryID: uint(rand.Intn(10)+1),
+			Price:       strconv.FormatFloat(float64(rand.Intn(100000))/100.0, 'f', 2, 64),
+			CategoryID:  randomCategory.Id,
 		}
 
-		_,err := productManager.Create(productData)
-		if err != nil {
-			fmt.Printf("Error creating product %d: %v\n", i+1, err)
-			return err
+		// _, err := productManager.Create(productData)
+		// if err != nil {
+		// 	fmt.Printf("Error creating product %d: %v\n", i+1, err)
+		// 	return err
+		// }
+
+		// fmt.Printf("Product %d created with SKU: %s\n", i+1, sku)
+
+		var newProduct *models.Product
+		maxRetries := 5
+		delay := 10 * time.Millisecond //intial delay
+
+		for retry := 0; retry <= maxRetries; retry++ {
+			sku := productManager.GenerateSKU()
+			productData.SKU = sku
+
+			newProduct, err = productManager.Create(productData)
+
+			if err == nil {
+				fmt.Printf("Product %d created with SKU: %s\n", i+1, sku)
+				break
+			}
+
+			if isDuplicateKeyError(err) {
+				fmt.Printf("Duplicate SKU error for product %d, retry %d: %v\n", i+1, retry+1, err)
+				time.Sleep(delay)
+				delay *= 2
+			} else {
+				fmt.Printf("Non duplicate error for product %d: %v\n", i+1, err)
+				return err
+			}
 		}
 
-		fmt.Printf("Product %d created with SKU: %s\n",i+1,sku)
+		if newProduct == nil {
+			return fmt.Errorf("failes to create product %d after %d retries",i+1, maxRetries)
+		}
 	}
 	return nil
 }
-
 
 func (productManager *productManager) GetLastProductID() (int, error) {
 	var product models.Product
@@ -182,4 +220,63 @@ func (productManager *productManager) GetLastProductID() (int, error) {
 		return 0, fmt.Errorf("failed to get last product: %w", result.Error)
 	}
 	return int(product.Id), nil
+}
+
+func (productManager *productManager) SeedCategories() error {
+	// Check if categories already exist
+	var existingCategories []models.Category
+	result := database.DB.Find(&existingCategories)
+	if result.Error != nil {
+		return fmt.Errorf("failed to check existing categories: %w", result.Error)
+	}
+
+	if len(existingCategories) > 0 {
+		fmt.Println("Categories already exist. Skipping seeding.")
+		return nil // Categories already exist, skip seeding
+	}
+
+	// Create some default categories
+	categories := []models.Category{
+		{Name: "Electronics", Description: "Electronic gadgets and devices"},
+		{Name: "Clothing", Description: "Apparel and fashion items"},
+		{Name: "Home & Kitchen", Description: "Products for home and kitchen"},
+	}
+
+	for _, category := range categories {
+		result := database.DB.Create(&category)
+		if result.Error != nil {
+			return fmt.Errorf("failed to create category %s: %w", category.Name, result.Error)
+		}
+		fmt.Printf("Created category: %s\n", category.Name)
+	}
+
+	//Create subcategories example
+	var electronicsCategory models.Category
+	database.DB.Where("name = ?", "Electronics").First(&electronicsCategory)
+
+	subcategories := []models.Category{
+		{Name: "Mobile phones", Description: "Mobile phones", ParentID: &electronicsCategory.Id},
+		{Name: "Laptops", Description: "Laptops", ParentID: &electronicsCategory.Id},
+	}
+
+	for _, category := range subcategories {
+		result := database.DB.Create(&category)
+		if result.Error != nil {
+			return fmt.Errorf("failed to create category %s: %w", category.Name, result.Error)
+		}
+		fmt.Printf("Created category: %s\n", category.Name)
+	}
+
+	return nil
+}
+
+
+func isDuplicateKeyError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errString := fmt.Sprintf("%v", err) // Convert error to string
+
+	return strings.Contains(errString, "Error 1062") || strings.Contains(errString, "duplicate entry")
 }

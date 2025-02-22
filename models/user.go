@@ -17,39 +17,42 @@ type Address struct {
 
 type User struct {
 	//gorm.Model
-	Id       uint `gorm:"primarykey"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:""`
+	Id        uint           `gorm:"primarykey"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:""`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
-	Email     string  `json:"email"`
-	Password  string  `json:"password"`
-	Phone     string  `json:"phone"`
-	Token     string  `gorm:"uniqueIndex:idx_users_token,length:191" json:"-"`
-	Address   Address `json:"address" gorm:"embedded"`
-	Image     string  `json:"image,omitempty"`
+	FirstName string         `json:"firstName"`
+	LastName  string         `json:"lastName"`
+	Email     string         `json:"email"`
+	Password  string         `json:"password"`
+	Phone     string         `json:"phone"`
+	Token     string         `gorm:"uniqueIndex:idx_users_token,length:191" json:"-"`
+	Address   Address        `json:"address" gorm:"embedded"`
+	Image     string         `json:"image,omitempty"`
 }
 
 type Product struct {
 	//gorm.Model
-	Id       uint `gorm:"primarykey"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:""`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	SKU         string `json:"sku" gorm:"uniqueIndex:idx_products_sku,length:191"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       string `json:"price"`
-	Image       string `json:"image,omitempty"`
-	CategoryID  uint   `json:"categoryID"`
+	Id          uint           `gorm:"primarykey"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:""`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+	SKU         string         `json:"sku" gorm:"uniqueIndex:idx_products_sku,length:191"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Price       string         `json:"price"`
+	Image       string         `json:"image,omitempty"`
+	CategoryID  uint           `json:"categoryID"`
+	Category    Category       `gorm:"foreignKey:CategoryID"`
 }
 
 type Category struct {
-	Id uint `gorm:"primary"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:""`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	Name string `json:"name"`
-	Description string `json:"description"`
+	Id          uint           `gorm:"primaryKey"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:""`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	ParentID    *uint          `json:"parentID,omitempty"`
+	Children    []Category     `gorm:"foreignKey:ParentID"`
 }
