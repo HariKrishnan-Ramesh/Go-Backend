@@ -290,3 +290,5 @@ func generateProductNameAndDescription(categoryName string, productID int) (stri
 		return fmt.Sprintf("Generic Product #%d", productID), fmt.Sprintf("A general-purpose product.  Product ID: %d.", productID)
 	}
 }
+
+

@@ -33,6 +33,9 @@ func main() {
 	productHandler := handlers.NewProductHandler(productManager)
 	productHandler.RegisterUserApis(router)
 
+	categoryManager := managers.NewCategoryManager() // New instance
+	categoryHandler := handlers.NewCategoryHandler(categoryManager)
+	categoryHandler.RegisterCategoryApis(router)
 
 	if err := productManager.SeedCategories(); err != nil {
 		log.Fatalf("Failed to seed categories: %v", err)
