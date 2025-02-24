@@ -3,7 +3,6 @@ package handlers
 import (
 	"main/common"
 	"main/managers"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -108,7 +107,7 @@ func (productHandler *ProductHandler) Update(ctx *gin.Context) {
 	}
 
 	common.SuccessResponseWithData(ctx, "Product updated successfully", updatedProduct)
-	ctx.JSON(http.StatusOK,updatedProduct)
+	//ctx.JSON(http.StatusOK,updatedProduct)
 }
 
 

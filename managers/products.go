@@ -63,7 +63,7 @@ func (productManager *productManager) List() ([]models.Product, error) {
 func (productManager *productManager) Get(id string) (*models.Product, error) {
 	var product models.Product
 
-	result := database.DB.First(&product, id)
+	result := database.DB.Preload("Category").First(&product, id)
 	if result.Error != nil {
 		return &models.Product{}, fmt.Errorf("failed to get product %w", result.Error)
 	}
@@ -158,25 +158,18 @@ func (productManager *productManager) SeedProducts(count int) error {
 
 	for i := 0; i < count; i++ {
 		nextProductID := lastProductID + i + 1
-		//sku := productManager.GenerateSKU()
 
 		randomCategory := categories[rand.Intn(len(categories))]
 
+		productName, productDescription := generateProductNameAndDescription(randomCategory.Name, nextProductID)
+
 		productData := &common.ProductCreationInput{
 			//SKU:         sku,
-			Name:        fmt.Sprintf("Product %d", nextProductID),
-			Description: "Generated Product",
+			Name:        productName,
+			Description: productDescription,
 			Price:       strconv.FormatFloat(float64(rand.Intn(100000))/100.0, 'f', 2, 64),
 			CategoryID:  randomCategory.Id,
 		}
-
-		// _, err := productManager.Create(productData)
-		// if err != nil {
-		// 	fmt.Printf("Error creating product %d: %v\n", i+1, err)
-		// 	return err
-		// }
-
-		// fmt.Printf("Product %d created with SKU: %s\n", i+1, sku)
 
 		var newProduct *models.Product
 		maxRetries := 5
@@ -270,7 +263,6 @@ func (productManager *productManager) SeedCategories() error {
 	return nil
 }
 
-
 func isDuplicateKeyError(err error) bool {
 	if err == nil {
 		return false
@@ -279,4 +271,22 @@ func isDuplicateKeyError(err error) bool {
 	errString := fmt.Sprintf("%v", err) // Convert error to string
 
 	return strings.Contains(errString, "Error 1062") || strings.Contains(errString, "duplicate entry")
+}
+
+
+func generateProductNameAndDescription(categoryName string, productID int) (string, string) {
+	switch strings.ToLower(categoryName) {
+	case "electronics":
+		return fmt.Sprintf("Electronic Gadget #%d", productID), fmt.Sprintf("A cutting-edge electronic gadget from our premium electronics line.  Product ID: %d.", productID)
+	case "clothing":
+		return fmt.Sprintf("Stylish Apparel Item #%d", productID), fmt.Sprintf("A trendy and comfortable clothing item.  Part of our latest fashion collection. Product ID: %d.", productID)
+	case "home & kitchen":
+		return fmt.Sprintf("Home Essential #%d", productID), fmt.Sprintf("A must-have item for your home and kitchen.  High-quality and durable. Product ID: %d.", productID)
+	case "mobile phones":
+		return fmt.Sprintf("Smartphone Model #%d", productID), fmt.Sprintf("Next gen mobile phones to meet every customers needs. Product ID: %d", productID)
+	case "laptops":
+		return fmt.Sprintf("Laptop Model #%d", productID), fmt.Sprintf("High performance laptops for work and gaming. Product ID: %d", productID)
+	default:
+		return fmt.Sprintf("Generic Product #%d", productID), fmt.Sprintf("A general-purpose product.  Product ID: %d.", productID)
+	}
 }

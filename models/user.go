@@ -17,9 +17,9 @@ type Address struct {
 
 type User struct {
 	//gorm.Model
-	Id        uint           `gorm:"primarykey"`
+	Id        uint           `gorm:"primarykey" json:"id"`
 	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:""`
+	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	FirstName string         `json:"firstName"`
 	LastName  string         `json:"lastName"`
@@ -33,9 +33,9 @@ type User struct {
 
 type Product struct {
 	//gorm.Model
-	Id          uint           `gorm:"primarykey"`
+	Id          uint           `gorm:"primarykey" json:"id"`
 	CreatedAt   time.Time      `json:"createdAt"`
-	UpdatedAt   time.Time      `json:""`
+	UpdatedAt   time.Time      `json:"updatedAt"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 	SKU         string         `json:"sku" gorm:"uniqueIndex:idx_products_sku,length:191"`
 	Name        string         `json:"name"`
@@ -43,16 +43,16 @@ type Product struct {
 	Price       string         `json:"price"`
 	Image       string         `json:"image,omitempty"`
 	CategoryID  uint           `json:"categoryID"`
-	Category    Category       `gorm:"foreignKey:CategoryID"`
+	Category    Category       `json:"category" gorm:"foreignKey:CategoryID"`
 }
 
 type Category struct {
-	Id          uint           `gorm:"primaryKey"`
+	Id          uint           `gorm:"primaryKey" json:"id"`
 	CreatedAt   time.Time      `json:"createdAt"`
-	UpdatedAt   time.Time      `json:""`
+	UpdatedAt   time.Time      `json:"updatedAt"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 	Name        string         `json:"name"`
 	Description string         `json:"description"`
 	ParentID    *uint          `json:"parentID,omitempty"`
-	Children    []Category     `gorm:"foreignKey:ParentID"`
+	Children    []Category     `json:"children" gorm:"foreignKey:ParentID"`
 }
