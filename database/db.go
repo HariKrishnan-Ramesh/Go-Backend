@@ -32,7 +32,7 @@ func Initialize() {
 		panic("Failed to connect database")
 	}
 
-	err = DB.AutoMigrate(&models.User{},&models.Category{},&models.Product{})
+	err = DB.AutoMigrate(&models.User{},&models.Category{},&models.Product{}, &models.Wishlist{})
 	if err != nil {
 		log.Fatalf("Failed to auto-migrate database: %v", err)
 		panic("Failed to Automigrate database")

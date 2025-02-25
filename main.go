@@ -37,6 +37,10 @@ func main() {
 	categoryHandler := handlers.NewCategoryHandler(categoryManager)
 	categoryHandler.RegisterCategoryApis(router)
 
+	wishlistManager := managers.NewWishlistManager()
+	wishlistHandler := handlers.NewWishlistHandler(wishlistManager)
+	wishlistHandler.RegisterWishlistApis(router)
+
 	if err := productManager.SeedCategories(); err != nil {
 		log.Fatalf("Failed to seed categories: %v", err)
 	}
