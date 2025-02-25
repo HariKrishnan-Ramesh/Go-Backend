@@ -17,3 +17,4 @@ type CategoryUpdationInput struct {
 func NewCategoryUpdationInput() *CategoryUpdationInput {
 	return &CategoryUpdationInput{}
 }
+
