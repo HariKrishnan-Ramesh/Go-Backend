@@ -61,8 +61,19 @@ type Wishlist struct {
 	Id        uint      `gorm:"primaryKey" json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	UserID    uint    `json:"userID"`
-	ProductID uint    `json:"productID"`
-	User      User    `json:"user" gorm:"foreignKey:UserID"`
-	Product   Product `json:"product" gorm:"foreignKey:ProductID"`
+	UserID    uint      `json:"userID"`
+	ProductID uint      `json:"productID"`
+	User      User      `json:"user" gorm:"foreignKey:UserID"`
+	Product   Product   `json:"product" gorm:"foreignKey:ProductID"`
+}
+
+type Cart struct {
+	Id        uint      `gorm:"primaryKey" json:"Id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	UserID    uint      `json:"userID"`
+	ProductID uint      `json:"productID"`
+	Quantity  uint      `json:"quantity"`
+	User      User      `json:"user" gorm:"foreignKey:UserID"`
+	Product   Product   `json:"product" gorm:"foreignKey:ProductID"`
 }
