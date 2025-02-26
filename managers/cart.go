@@ -11,6 +11,7 @@ type CartManager interface {
 	Add(cartData *common.CartCreationInput)(*models.Cart,error)
 	View(userID uint) ([]models.Cart, error)
 	Update(cartID uint, updateData *common.CartUpdateInput) (*models.Cart, error)
+	Delete(cartID uint) error
 }
 
 type cartManager struct{
@@ -55,7 +56,7 @@ func (cartmanager *cartManager) Add(cartData *common.CartCreationInput)(*models.
 
 func (cartmanager *cartManager) View(userID uint) ([]models.Cart, error) {
 	var cartItems []models.Cart
-	result := database.DB.Preload("User").Preload("Product.Category").Where("user_id = ?").Find(&cartItems)
+	result := database.DB.Preload("User").Preload("Product.Category").Where("user_id = ?",userID).Find(&cartItems)
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to view cart: %w",result.Error)
 	}
@@ -81,3 +82,16 @@ func (cartmanager *cartManager) Update(cartID uint, updateData *common.CartUpdat
 
 }
 
+
+func (cartmanager *cartManager) Delete(cartID uint) error {
+	var cartItem models.Cart
+	result := database.DB.Delete(&cartItem, cartID)
+	if result.Error != nil {
+		return fmt.Errorf("failed to delete cart item: %w",result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("cart item with id %d not found",cartID)
+	}
+	return nil
+}
