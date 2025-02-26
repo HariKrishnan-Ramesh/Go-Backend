@@ -9,10 +9,16 @@ import (
 
 type CartManager interface {
 	Add(cartData *common.CartCreationInput)(*models.Cart,error)
+	View(userID uint) ([]models.Cart, error)
+	Update(cartID uint, updateData *common.CartUpdateInput) (*models.Cart, error)
 }
 
 type cartManager struct{
 	//dbclient
+}
+
+func NewCartManager() CartManager {
+	return &cartManager{}
 }
 
 func (cartmanager *cartManager) Add(cartData *common.CartCreationInput)(*models.Cart,error) {
@@ -45,3 +51,33 @@ func (cartmanager *cartManager) Add(cartData *common.CartCreationInput)(*models.
 	database.DB.Preload("User").Preload("Product.Category").First(&newCartItem, newCartItem.Id)
 	return newCartItem,nil
 }
+
+
+func (cartmanager *cartManager) View(userID uint) ([]models.Cart, error) {
+	var cartItems []models.Cart
+	result := database.DB.Preload("User").Preload("Product.Category").Where("user_id = ?").Find(&cartItems)
+	if result.Error != nil {
+		return nil, fmt.Errorf("failed to view cart: %w",result.Error)
+	}
+	return cartItems, nil
+}
+
+
+func (cartmanager *cartManager) Update(cartID uint, updateData *common.CartUpdateInput) (*models.Cart, error) {
+	var cartItem models.Cart
+	result := database.DB.First(&cartItem, cartID)
+	if result.Error != nil {
+		return nil, fmt.Errorf("cart item not found: %w",result.Error)
+	}
+
+	cartItem.Quantity = updateData.Quantity
+	result = database.DB.Save(&cartItem)
+	if result.Error != nil {
+		return nil, fmt.Errorf("failed to update cart item: %w", result.Error)
+	}
+
+	database.DB.Preload("User").Preload("Product.Category").First(&cartItem, cartItem.Id)
+	return &cartItem, nil
+
+}
+
