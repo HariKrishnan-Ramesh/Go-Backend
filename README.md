@@ -173,10 +173,6 @@ Future development should include:
 
 The API uses Gin's binding and validation features to validate input data.  The `binding:"required"` tag is used to mark required fields.  Custom validation logic can be added as needed.
 
-## Contributing
-
-Contributions are welcome!  Please submit a pull request with your changes.
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
