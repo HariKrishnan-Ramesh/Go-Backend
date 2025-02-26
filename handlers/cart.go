@@ -15,7 +15,7 @@ type CartHandler struct {
 
 func NewCartHandler(cartManager managers.CartManager) *CartHandler {
 	return &CartHandler{
-		"api/carts",
+		"api/cart",
 		cartManager,
 	}
 }
@@ -23,8 +23,9 @@ func NewCartHandler(cartManager managers.CartManager) *CartHandler {
 func (carthandler *CartHandler) RegisterCartApis(router *gin.Engine){
 	cartGroup := router.Group(carthandler.groupName)
 	cartGroup.POST("",carthandler.Add)
-	cartGroup.GET(":userid/",carthandler.View)
+	cartGroup.GET(":userid",carthandler.View)
 	cartGroup.PATCH(":cartid/",carthandler.Update)
+	cartGroup.DELETE(":cartid/",carthandler.Delete)
 }
 
 func (carthandler *CartHandler) Add(ctx *gin.Context) {
@@ -94,4 +95,27 @@ func (carthandler *CartHandler) Update(ctx *gin.Context) {
 	}
 
 	common.SuccessResponseWithData(ctx,"Cart item updated Successfully",updatedCartItem)
+}
+
+
+func (carthandler *CartHandler) Delete(ctx *gin.Context) {
+	cartIDStr, ok := ctx.Params.Get("cartid")
+	if !ok {
+		common.BadResponse(ctx, "Cart ID is required")
+		return
+	}
+
+	cartID, err := strconv.Atoi(cartIDStr)
+	if err != nil {
+		common.BadResponse(ctx, "Invalid Cart ID")
+		return
+	}
+
+	err = carthandler.cartManager.Delete(uint(cartID))
+	if err != nil {
+		common.InternalServerErrorResponse(ctx, "Failed to delete the cart item")
+		return
+	}
+
+	common.InternalServerErrorResponse(ctx, "Cart item deleted Successfully")
 }
