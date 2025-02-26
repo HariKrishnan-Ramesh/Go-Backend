@@ -25,9 +25,9 @@ func (productHandler *ProductHandler) RegisterUserApis(router *gin.Engine){
 	productGroup := router.Group(productHandler.groupName)
 	productGroup.POST("",productHandler.Create)
 	productGroup.GET("",productHandler.List)
-	productGroup.GET(":productid/",productHandler.Get)
-	productGroup.PATCH(":productid/",productHandler.Update)
-	productGroup.DELETE(":productid/",productHandler.Delete)
+	productGroup.GET(":productid",productHandler.Get)
+	productGroup.PATCH(":productid",productHandler.Update)
+	productGroup.DELETE(":productid",productHandler.Delete)
 }
 
 func (productHandler *ProductHandler) Create(ctx *gin.Context) {

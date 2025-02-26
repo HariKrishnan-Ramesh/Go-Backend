@@ -23,9 +23,9 @@ func NewWishlistHandler(wishlistManager managers.WishlistManager) *WishlistHandl
 func (wishlisthandler *WishlistHandler) RegisterWishlistApis(router *gin.Engine) {
 	wishlistGroup := router.Group(wishlisthandler.groupName)
 	wishlistGroup.POST("", wishlisthandler.Add)
-	wishlistGroup.GET(":userid/", wishlisthandler.View)
+	wishlistGroup.GET(":userid", wishlisthandler.View)
 	wishlistGroup.GET("", wishlisthandler.ViewAll)
-	wishlistGroup.DELETE(":wishlistid/", wishlisthandler.Delete)
+	wishlistGroup.DELETE(":wishlistid", wishlisthandler.Delete)
 }
 
 func (wishlisthandler *WishlistHandler) Add(ctx *gin.Context) {
