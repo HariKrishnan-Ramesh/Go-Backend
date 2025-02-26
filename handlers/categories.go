@@ -8,7 +8,7 @@ import (
 )
 
 type CategoryHandler struct {
-	groupName      string
+	groupName       string
 	categoryManager managers.CategoryManager
 }
 
@@ -19,17 +19,17 @@ func NewCategoryHandler(categoryManager managers.CategoryManager) *CategoryHandl
 	}
 }
 
-func (categoryHandler *CategoryHandler) RegisterCategoryApis(router *gin.Engine) {
-	categoryGroup := router.Group(categoryHandler.groupName)
-	categoryGroup.GET("", categoryHandler.List)
-	categoryGroup.GET(":categoryid/", categoryHandler.Get)
-	categoryGroup.POST("", categoryHandler.Create)
-	categoryGroup.PATCH(":categoryid/", categoryHandler.Update)
-	categoryGroup.DELETE(":categoryid/", categoryHandler.Delete)
+func (ch *CategoryHandler) RegisterCategoryApis(router *gin.Engine) {
+	categoryGroup := router.Group(ch.groupName)
+	categoryGroup.GET("", ch.List)
+	categoryGroup.GET(":categoryid", ch.Get) 
+	categoryGroup.POST("", ch.Create)
+	categoryGroup.PATCH(":categoryid", ch.Update) 
+	categoryGroup.DELETE(":categoryid", ch.Delete)
 }
 
-func (categoryHandler *CategoryHandler) List(ctx *gin.Context) {
-	categories, err := categoryHandler.categoryManager.List()
+func (ch *CategoryHandler) List(ctx *gin.Context) {
+	categories, err := ch.categoryManager.List()
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to list categories")
 		return
@@ -37,14 +37,14 @@ func (categoryHandler *CategoryHandler) List(ctx *gin.Context) {
 	common.SuccessResponseWithData(ctx, "Categories retrieved successfully", categories)
 }
 
-func (categoryHandler *CategoryHandler) Get(ctx *gin.Context) {
-	categoryID, ok := ctx.Params.Get("categoryid")
-	if !ok {
+func (ch *CategoryHandler) Get(ctx *gin.Context) {
+	categoryID := ctx.Param("categoryid") 
+	if categoryID == "" {
 		common.BadResponse(ctx, "Category ID is required")
 		return
 	}
 
-	category, err := categoryHandler.categoryManager.Get(categoryID)
+	category, err := ch.categoryManager.Get(categoryID)
 	if err != nil {
 		common.BadResponse(ctx, "Failed to get category")
 		return
@@ -58,14 +58,14 @@ func (categoryHandler *CategoryHandler) Get(ctx *gin.Context) {
 	common.SuccessResponseWithData(ctx, "Category retrieved successfully", category)
 }
 
-func (categoryHandler *CategoryHandler) Create(ctx *gin.Context) {
-	categoryData := common.NewCategoryCreationInput()  // Assuming you have this
+func (ch *CategoryHandler) Create(ctx *gin.Context) {
+	categoryData := common.NewCategoryCreationInput() 
 	if err := ctx.BindJSON(&categoryData); err != nil {
 		common.BadResponse(ctx, "Failed to bind category data")
 		return
 	}
 
-	newCategory, err := categoryHandler.categoryManager.Create(categoryData)
+	newCategory, err := ch.categoryManager.Create(categoryData)
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to create category")
 		return
@@ -73,20 +73,20 @@ func (categoryHandler *CategoryHandler) Create(ctx *gin.Context) {
 	common.SuccessResponseWithData(ctx, "Category created successfully", newCategory)
 }
 
-func (categoryHandler *CategoryHandler) Update(ctx *gin.Context) {
-	categoryID, ok := ctx.Params.Get("categoryid")
-	if !ok {
+func (ch *CategoryHandler) Update(ctx *gin.Context) {
+	categoryID := ctx.Param("categoryid") 
+	if categoryID == "" {
 		common.BadResponse(ctx, "Category ID is required")
 		return
 	}
 
-	categoryUpdateData := common.NewCategoryUpdationInput()  // Assuming you have this
+	categoryUpdateData := common.NewCategoryUpdationInput() 
 	if err := ctx.BindJSON(&categoryUpdateData); err != nil {
 		common.BadResponse(ctx, "Failed to bind update data")
 		return
 	}
 
-	updatedCategory, err := categoryHandler.categoryManager.Update(categoryID, categoryUpdateData)
+	updatedCategory, err := ch.categoryManager.Update(categoryID, categoryUpdateData)
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to update category")
 		return
@@ -95,14 +95,14 @@ func (categoryHandler *CategoryHandler) Update(ctx *gin.Context) {
 	common.SuccessResponseWithData(ctx, "Category updated successfully", updatedCategory)
 }
 
-func (categoryHandler *CategoryHandler) Delete(ctx *gin.Context) {
-	categoryID, ok := ctx.Params.Get("categoryid")
-	if !ok {
+func (ch *CategoryHandler) Delete(ctx *gin.Context) {
+	categoryID := ctx.Param("categoryid")
+	if categoryID == "" {
 		common.BadResponse(ctx, "Category ID is required")
 		return
 	}
 
-	err := categoryHandler.categoryManager.Delete(categoryID)
+	err := ch.categoryManager.Delete(categoryID)
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to delete category")
 		return
