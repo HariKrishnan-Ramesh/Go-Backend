@@ -20,7 +20,6 @@ This project provides a RESTful API for a basic e-commerce platform built using 
 - [Error Handling](#error-handling)
 - [Authentication/Authorization (TODO)](#authenticationauthorization-todo)
 - [Input Validation](#input-validation)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Features
