@@ -10,6 +10,7 @@ import (
 type CartManager interface {
 	Add(cartData *common.CartCreationInput) (*models.Cart, error)
 	View(userID uint) ([]models.Cart, error)
+	ViewAll() ([]models.Cart, error) 
 	Update(cartID uint, updateData *common.CartUpdateInput) (*models.Cart, error)
 	Delete(cartID uint) error
 }
@@ -64,6 +65,16 @@ func (cartmanager *cartManager) View(userID uint) ([]models.Cart, error) {
 	err := database.DB.Preload("User").Preload("Product.Category").Where("user_id = ?", userID).Find(&cartItems).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to view cart: %w", err)
+	}
+	return cartItems, nil
+}
+
+
+func (cartmanager *cartManager) ViewAll() ([]models.Cart, error) {
+	var cartItems []models.Cart
+	err := database.DB.Preload("User").Preload("Product.Category").Find(&cartItems).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to view all carts: %w", err)
 	}
 	return cartItems, nil
 }

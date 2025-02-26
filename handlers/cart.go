@@ -24,6 +24,7 @@ func (carthandler *CartHandler) RegisterCartApis(router *gin.Engine) {
 	cartGroup := router.Group(carthandler.groupName)
 	cartGroup.POST("", carthandler.Add)
 	cartGroup.GET(":userid", carthandler.View)
+	cartGroup.GET("", carthandler.ViewAll)
 	cartGroup.PATCH(":cartid", carthandler.Update)
 	cartGroup.DELETE(":cartid", carthandler.Delete) 
 }
@@ -59,6 +60,17 @@ func (carthandler *CartHandler) View(ctx *gin.Context) {
 	}
 
 	common.SuccessResponseWithData(ctx, "Cart retrieved successfully", cartItems)
+}
+
+
+func (ch *CartHandler) ViewAll(ctx *gin.Context) {
+	cartItems, err := ch.cartManager.ViewAll()
+	if err != nil {
+		common.InternalServerErrorResponse(ctx, "Failed to view all carts")
+		return
+	}
+
+	common.SuccessResponseWithData(ctx, "All Carts retrieved successfully", cartItems)
 }
 
 func (carthandler *CartHandler) Update(ctx *gin.Context) {
