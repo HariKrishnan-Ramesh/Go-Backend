@@ -17,6 +17,7 @@ type ProductManager interface {
 	Get(id string) (*models.Product, error)
 	Update(productID string, productData *common.ProductUpdationInput) (*models.Product, error)
 	Delete(id string) error
+	SearchProducts(searchTerm string) ([]models.Product, error)
 	GenerateSKU() string
 	SeedProducts(count int) error
 	GetLastProductID() (int, error)
@@ -122,6 +123,22 @@ func (productManager *productManager) Delete(id string) error {
 
 	return nil
 }
+
+
+func (productManager *productManager) SearchProducts(searchTerm string) ([]models.Product, error) {
+	var products []models.Product
+
+	query := database.DB.Preload("Category").Where("name LIKE ? OR description LIKE ?","%"+searchTerm+"%","%"+searchTerm+"%")
+
+	result := query.Find(&products)
+	if result.Error != nil {
+		return nil,fmt.Errorf("failed to search products: %w",result.Error)
+	}
+
+	return products,nil
+}
+
+
 
 func (productManager *productManager) GenerateSKU() string {
 	rand.Seed(time.Now().UnixNano())
