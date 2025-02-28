@@ -13,6 +13,7 @@ type CategoryManager interface {
 	Get(id string) (*models.Category, error)
 	Update(categoryID string, categoryData *common.CategoryUpdationInput) (*models.Category, error)
 	Delete(id string) error
+	GetCategoryCount() (int, error)
 }
 
 type categoryManager struct {
@@ -38,7 +39,7 @@ func (cm *categoryManager) Create(categoryData *common.CategoryCreationInput) (*
 
 func (cm *categoryManager) List() ([]models.Category, error) {
 	var categories []models.Category
-	result := database.DB.Find(&categories)
+	result := database.DB.Preload("Children").Find(&categories)
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to list categories: %w", result.Error)
 	}
@@ -47,7 +48,7 @@ func (cm *categoryManager) List() ([]models.Category, error) {
 
 func (cm *categoryManager) Get(id string) (*models.Category, error) {
 	var category models.Category
-	result := database.DB.First(&category, id)
+	result := database.DB.Preload("Children").First(&category, id)
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to get category: %w", result.Error)
 	}
