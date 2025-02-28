@@ -63,8 +63,8 @@ func (carthandler *CartHandler) View(ctx *gin.Context) {
 }
 
 
-func (ch *CartHandler) ViewAll(ctx *gin.Context) {
-	cartItems, err := ch.cartManager.ViewAll()
+func (carthandler *CartHandler) ViewAll(ctx *gin.Context) {
+	cartItems, err := carthandler.cartManager.ViewAll()
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to view all carts")
 		return
