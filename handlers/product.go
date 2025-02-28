@@ -28,7 +28,7 @@ func (productHandler *ProductHandler) RegisterUserApis(router *gin.Engine){
 	productGroup.GET(":productid",productHandler.Get)
 	productGroup.PATCH(":productid",productHandler.Update)
 	productGroup.DELETE(":productid",productHandler.Delete)
-	productGroup.GET("search/:searchTerm",productHandler.Search)
+	productGroup.GET("search/",productHandler.Search)
 }
 
 func (productHandler *ProductHandler) Create(ctx *gin.Context) {
@@ -131,7 +131,7 @@ func (productHandler *ProductHandler) Delete(ctx *gin.Context) {
 
 
 func (productHandler *ProductHandler) Search(ctx *gin.Context) {
-	searchTerm := ctx.Param("searchTerm")
+	searchTerm := ctx.Query("products")
 
 	if searchTerm == "" {
 		common.BadResponse(ctx, "Search term is required")
@@ -141,6 +141,7 @@ func (productHandler *ProductHandler) Search(ctx *gin.Context) {
 	products,err := productHandler.productManager.SearchProducts(searchTerm)
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to search products")
+		return
 	}
 
 	common.SuccessResponseWithData(ctx, "Products retrieved Successfully",products)
