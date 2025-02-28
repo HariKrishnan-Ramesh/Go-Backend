@@ -66,7 +66,7 @@ func (wishlistmanager *wishlistManager) Delete(wishlistID uint) error {
 	return nil
 }
 
-func (wm *wishlistManager) ViewAll() ([]models.Wishlist, error) {
+func (wishlistmanager *wishlistManager) ViewAll() ([]models.Wishlist, error) {
 	var wishlists []models.Wishlist
 
 	result := database.DB.Preload("User").Preload("Product.Category").Find(&wishlists)
