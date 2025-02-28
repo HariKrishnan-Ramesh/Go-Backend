@@ -26,7 +26,7 @@ func (carthandler *CartHandler) RegisterCartApis(router *gin.Engine) {
 	cartGroup.GET(":userid", carthandler.View)
 	cartGroup.GET("", carthandler.ViewAll)
 	cartGroup.PATCH(":cartid", carthandler.Update)
-	cartGroup.DELETE(":cartid", carthandler.Delete) 
+	cartGroup.DELETE(":cartid", carthandler.Delete)
 }
 
 func (carthandler *CartHandler) Add(ctx *gin.Context) {
