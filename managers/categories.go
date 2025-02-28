@@ -23,7 +23,7 @@ func NewCategoryManager() CategoryManager {
 	return &categoryManager{}
 }
 
-func (cm *categoryManager) Create(categoryData *common.CategoryCreationInput) (*models.Category, error) {
+func (categoryManager *categoryManager) Create(categoryData *common.CategoryCreationInput) (*models.Category, error) {
 	newCategory := &models.Category{
 		Name:        categoryData.Name,
 		Description: categoryData.Description,
@@ -37,7 +37,7 @@ func (cm *categoryManager) Create(categoryData *common.CategoryCreationInput) (*
 	return newCategory, nil
 }
 
-func (cm *categoryManager) List() ([]models.Category, error) {
+func (categoryManager *categoryManager) List() ([]models.Category, error) {
 	var categories []models.Category
 	result := database.DB.Preload("Children").Find(&categories)
 	if result.Error != nil {
@@ -46,7 +46,7 @@ func (cm *categoryManager) List() ([]models.Category, error) {
 	return categories, nil
 }
 
-func (cm *categoryManager) Get(id string) (*models.Category, error) {
+func (categoryManager *categoryManager) Get(id string) (*models.Category, error) {
 	var category models.Category
 	result := database.DB.Preload("Children").First(&category, id)
 	if result.Error != nil {
@@ -55,7 +55,7 @@ func (cm *categoryManager) Get(id string) (*models.Category, error) {
 	return &category, nil
 }
 
-func (cm *categoryManager) Update(categoryID string, categoryData *common.CategoryUpdationInput) (*models.Category, error) {
+func (categoryManager *categoryManager) Update(categoryID string, categoryData *common.CategoryUpdationInput) (*models.Category, error) {
 	var category models.Category
 	result := database.DB.First(&category, categoryID)
 	if result.Error != nil {
@@ -76,7 +76,7 @@ func (cm *categoryManager) Update(categoryID string, categoryData *common.Catego
 	return &category, nil
 }
 
-func (cm *categoryManager) Delete(id string) error {
+func (categoryManager *categoryManager) Delete(id string) error {
 	var category models.Category
 	result := database.DB.Delete(&category, id)
 	if result.Error != nil {
@@ -89,7 +89,7 @@ func (cm *categoryManager) Delete(id string) error {
 	return nil
 }
 
-func (cm *categoryManager) GetCategoryCount() (int, error) {
+func (categoryManager *categoryManager) GetCategoryCount() (int, error) {
 	var count int64
 	result := database.DB.Model(&models.Category{}).Count(&count)
 	if result.Error != nil {
