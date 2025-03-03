@@ -22,9 +22,9 @@ func NewCategoryHandler(categoryManager managers.CategoryManager) *CategoryHandl
 func (categoryhandler *CategoryHandler) RegisterCategoryApis(router *gin.Engine) {
 	categoryGroup := router.Group(categoryhandler.groupName)
 	categoryGroup.GET("", categoryhandler.List)
-	categoryGroup.GET(":categoryid", categoryhandler.Get) 
+	categoryGroup.GET(":categoryid", categoryhandler.Get)
 	categoryGroup.POST("", categoryhandler.Create)
-	categoryGroup.PATCH(":categoryid", categoryhandler.Update) 
+	categoryGroup.PATCH(":categoryid", categoryhandler.Update)
 	categoryGroup.DELETE(":categoryid", categoryhandler.Delete)
 }
 
@@ -38,7 +38,7 @@ func (categoryhandler *CategoryHandler) List(ctx *gin.Context) {
 }
 
 func (categoryhandler *CategoryHandler) Get(ctx *gin.Context) {
-	categoryID := ctx.Param("categoryid") 
+	categoryID := ctx.Param("categoryid")
 	if categoryID == "" {
 		common.BadResponse(ctx, "Category ID is required")
 		return
@@ -59,7 +59,7 @@ func (categoryhandler *CategoryHandler) Get(ctx *gin.Context) {
 }
 
 func (categoryhandler *CategoryHandler) Create(ctx *gin.Context) {
-	categoryData := common.NewCategoryCreationInput() 
+	categoryData := common.NewCategoryCreationInput()
 	if err := ctx.BindJSON(&categoryData); err != nil {
 		common.BadResponse(ctx, "Failed to bind category data")
 		return
@@ -74,13 +74,13 @@ func (categoryhandler *CategoryHandler) Create(ctx *gin.Context) {
 }
 
 func (categoryhandler *CategoryHandler) Update(ctx *gin.Context) {
-	categoryID := ctx.Param("categoryid") 
+	categoryID := ctx.Param("categoryid")
 	if categoryID == "" {
 		common.BadResponse(ctx, "Category ID is required")
 		return
 	}
 
-	categoryUpdateData := common.NewCategoryUpdationInput() 
+	categoryUpdateData := common.NewCategoryUpdationInput()
 	if err := ctx.BindJSON(&categoryUpdateData); err != nil {
 		common.BadResponse(ctx, "Failed to bind update data")
 		return

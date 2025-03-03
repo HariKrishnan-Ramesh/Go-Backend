@@ -12,23 +12,21 @@ type ProductHandler struct {
 	productManager managers.ProductManager
 }
 
-
 func NewProductHandler(productManager managers.ProductManager) *ProductHandler {
 	return &ProductHandler{
-		"api/product" ,
+		"api/product",
 		productManager,
 	}
 }
 
-
-func (productHandler *ProductHandler) RegisterUserApis(router *gin.Engine){
+func (productHandler *ProductHandler) RegisterUserApis(router *gin.Engine) {
 	productGroup := router.Group(productHandler.groupName)
-	productGroup.POST("",productHandler.Create)
-	productGroup.GET("",productHandler.List)
-	productGroup.GET(":productid",productHandler.Get)
-	productGroup.PATCH(":productid",productHandler.Update)
-	productGroup.DELETE(":productid",productHandler.Delete)
-	productGroup.GET("search/",productHandler.Search)
+	productGroup.POST("", productHandler.Create)
+	productGroup.GET("", productHandler.List)
+	productGroup.GET(":productid", productHandler.Get)
+	productGroup.PATCH(":productid", productHandler.Update)
+	productGroup.DELETE(":productid", productHandler.Delete)
+	productGroup.GET("search/", productHandler.Search)
 }
 
 func (productHandler *ProductHandler) Create(ctx *gin.Context) {
@@ -36,13 +34,13 @@ func (productHandler *ProductHandler) Create(ctx *gin.Context) {
 	productData := common.NewProductCreationInput()
 
 	err := ctx.BindJSON(&productData)
-	if err!=nil{
+	if err != nil {
 		common.BadResponse(ctx, "Failed to bind data for product")
 		return
 	}
 
 	newProduct, err := productHandler.productManager.Create(productData)
-	if err!=nil{
+	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to create product")
 		return
 	}
@@ -51,21 +49,21 @@ func (productHandler *ProductHandler) Create(ctx *gin.Context) {
 
 }
 
-//List all products
-func (productHandler *ProductHandler) List(ctx *gin.Context){
-	products,err := productHandler.productManager.List()
+// List all products
+func (productHandler *ProductHandler) List(ctx *gin.Context) {
+	products, err := productHandler.productManager.List()
 
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to list products")
 		return
 	}
 
-	common.SuccessResponseWithData(ctx, "Products retrieved Successfully",products)
+	common.SuccessResponseWithData(ctx, "Products retrieved Successfully", products)
 
 }
 
-//Get single Item by ID
-func (productHandler *ProductHandler) Get(ctx *gin.Context){
+// Get single Item by ID
+func (productHandler *ProductHandler) Get(ctx *gin.Context) {
 	productID, ok := ctx.Params.Get("productid")
 	if !ok {
 		common.BadResponse(ctx, "Product ID is required")
@@ -86,22 +84,21 @@ func (productHandler *ProductHandler) Get(ctx *gin.Context){
 	common.SuccessResponseWithData(ctx, "Product Retrieved Successfully", product)
 }
 
-
-//Update a product
+// Update a product
 func (productHandler *ProductHandler) Update(ctx *gin.Context) {
 	productID, ok := ctx.Params.Get("productid")
 	if !ok {
-		common.BadResponse(ctx,"Product ID is required")
+		common.BadResponse(ctx, "Product ID is required")
 		return
 	}
 
 	productUpdateData := common.NewProductUpdationInput()
-	if err := ctx.BindJSON(&productUpdateData) ; err != nil {
-		common.InternalServerErrorResponse(ctx,"Failed to update Product")
+	if err := ctx.BindJSON(&productUpdateData); err != nil {
+		common.InternalServerErrorResponse(ctx, "Failed to update Product")
 		return
 	}
 
-	updatedProduct, err := productHandler.productManager.Update(productID,productUpdateData)
+	updatedProduct, err := productHandler.productManager.Update(productID, productUpdateData)
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to update product")
 		return
@@ -111,8 +108,7 @@ func (productHandler *ProductHandler) Update(ctx *gin.Context) {
 	//ctx.JSON(http.StatusOK,updatedProduct)
 }
 
-
-//Delete a data
+// Delete a data
 func (productHandler *ProductHandler) Delete(ctx *gin.Context) {
 	productID, ok := ctx.Params.Get("productid")
 	if !ok {
@@ -120,7 +116,7 @@ func (productHandler *ProductHandler) Delete(ctx *gin.Context) {
 		return
 	}
 
-	err :=productHandler.productManager.Delete(productID)
+	err := productHandler.productManager.Delete(productID)
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to delete product")
 		return
@@ -128,7 +124,6 @@ func (productHandler *ProductHandler) Delete(ctx *gin.Context) {
 
 	common.SuccessResponse(ctx, "Product deleted successfully")
 }
-
 
 func (productHandler *ProductHandler) Search(ctx *gin.Context) {
 	searchTerm := ctx.Query("products")
@@ -138,11 +133,11 @@ func (productHandler *ProductHandler) Search(ctx *gin.Context) {
 		return
 	}
 
-	products,err := productHandler.productManager.SearchProducts(searchTerm)
+	products, err := productHandler.productManager.SearchProducts(searchTerm)
 	if err != nil {
 		common.InternalServerErrorResponse(ctx, "Failed to search products")
 		return
 	}
 
-	common.SuccessResponseWithData(ctx, "Products retrieved Successfully",products)
+	common.SuccessResponseWithData(ctx, "Products retrieved Successfully", products)
 }

@@ -7,8 +7,8 @@ import (
 	"main/models"
 	"math/rand"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 )
 
 type ProductManager interface {
@@ -72,7 +72,7 @@ func (productManager *productManager) Get(id string) (*models.Product, error) {
 	}
 
 	fmt.Printf("Attempting to get product with ID: %d\n", productID)
-	
+
 	result := database.DB.Preload("Category").First(&product, productID)
 	if result.Error != nil {
 		return &models.Product{}, fmt.Errorf("failed to get product %w", result.Error)
@@ -133,21 +133,18 @@ func (productManager *productManager) Delete(id string) error {
 	return nil
 }
 
-
 func (productManager *productManager) SearchProducts(searchTerm string) ([]models.Product, error) {
 	var products []models.Product
 
-	query := database.DB.Preload("Category").Where("name LIKE ? OR description LIKE ?","%"+searchTerm+"%","%"+searchTerm+"%")
+	query := database.DB.Preload("Category").Where("name LIKE ? OR description LIKE ?", "%"+searchTerm+"%", "%"+searchTerm+"%")
 
 	result := query.Find(&products)
 	if result.Error != nil {
-		return nil,fmt.Errorf("failed to search products: %w",result.Error)
+		return nil, fmt.Errorf("failed to search products: %w", result.Error)
 	}
 
-	return products,nil
+	return products, nil
 }
-
-
 
 func (productManager *productManager) GenerateSKU() string {
 	rand.Seed(time.Now().UnixNano())
@@ -223,7 +220,7 @@ func (productManager *productManager) SeedProducts(count int) error {
 		}
 
 		if newProduct == nil {
-			return fmt.Errorf("failes to create product %d after %d retries",i+1, maxRetries)
+			return fmt.Errorf("failes to create product %d after %d retries", i+1, maxRetries)
 		}
 	}
 	return nil
@@ -272,11 +269,10 @@ func (productManager *productManager) SeedCategories() error {
 	//Create subcategories example
 	var electronicsCategory models.Category
 	database.DB.Where("name = ?", "Electronics").First(&electronicsCategory)
-	
+
 	subcategories := []models.Category{
 		{Name: "Mobile phones", Description: "Mobile phones", ParentID: &electronicsCategory.Id},
 		{Name: "Laptops", Description: "Laptops", ParentID: &electronicsCategory.Id},
-		
 	}
 
 	for _, category := range subcategories {
@@ -300,7 +296,6 @@ func isDuplicateKeyError(err error) bool {
 	return strings.Contains(errString, "Error 1062") || strings.Contains(errString, "duplicate entry")
 }
 
-
 func generateProductNameAndDescription(categoryName string, productID int) (string, string) {
 	switch strings.ToLower(categoryName) {
 	case "electronics":
@@ -317,5 +312,3 @@ func generateProductNameAndDescription(categoryName string, productID int) (stri
 		return fmt.Sprintf("Generic Product #%d", productID), fmt.Sprintf("A general-purpose product.  Product ID: %d.", productID)
 	}
 }
-
-

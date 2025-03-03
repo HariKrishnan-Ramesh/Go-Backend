@@ -28,7 +28,7 @@ func (categoryManager *categoryManager) Create(categoryData *common.CategoryCrea
 	newCategory := &models.Category{
 		Name:        categoryData.Name,
 		Description: categoryData.Description,
-		ParentID: categoryData.ParentID,
+		ParentID:    categoryData.ParentID,
 	}
 
 	result := database.DB.Create(newCategory)
@@ -63,9 +63,8 @@ func (categoryManager *categoryManager) Update(categoryID string, categoryData *
 
 	id, err := strconv.Atoi(categoryID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid category id: %w",err)
+		return nil, fmt.Errorf("invalid category id: %w", err)
 	}
-
 
 	var category models.Category
 	result := database.DB.First(&category, id)
