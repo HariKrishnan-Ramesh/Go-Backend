@@ -263,10 +263,11 @@ func (productManager *productManager) SeedCategories() error {
 	//Create subcategories example
 	var electronicsCategory models.Category
 	database.DB.Where("name = ?", "Electronics").First(&electronicsCategory)
-
+	
 	subcategories := []models.Category{
 		{Name: "Mobile phones", Description: "Mobile phones", ParentID: &electronicsCategory.Id},
 		{Name: "Laptops", Description: "Laptops", ParentID: &electronicsCategory.Id},
+		
 	}
 
 	for _, category := range subcategories {
