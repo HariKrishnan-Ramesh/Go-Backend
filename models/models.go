@@ -53,7 +53,7 @@ type Category struct {
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 	Name        string         `json:"name"`
 	Description string         `json:"description"`
-	ParentID    *uint          `json:"parentID,omitempty"`
+	ParentID    *uint          `json:"parentID"`
 	Children    []Category     `json:"children" gorm:"foreignKey:ParentID"`
 }
 
