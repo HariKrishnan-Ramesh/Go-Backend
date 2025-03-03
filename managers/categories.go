@@ -5,6 +5,7 @@ import (
 	"main/common"
 	"main/database"
 	"main/models"
+	"strconv"
 )
 
 type CategoryManager interface {
@@ -27,6 +28,7 @@ func (categoryManager *categoryManager) Create(categoryData *common.CategoryCrea
 	newCategory := &models.Category{
 		Name:        categoryData.Name,
 		Description: categoryData.Description,
+		ParentID: categoryData.ParentID,
 	}
 
 	result := database.DB.Create(newCategory)
@@ -39,7 +41,9 @@ func (categoryManager *categoryManager) Create(categoryData *common.CategoryCrea
 
 func (categoryManager *categoryManager) List() ([]models.Category, error) {
 	var categories []models.Category
-	result := database.DB.Preload("Children").Find(&categories)
+
+	result := database.DB.Preload("Children").Preload("Products").Find(&categories)
+
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to list categories: %w", result.Error)
 	}
@@ -48,7 +52,7 @@ func (categoryManager *categoryManager) List() ([]models.Category, error) {
 
 func (categoryManager *categoryManager) Get(id string) (*models.Category, error) {
 	var category models.Category
-	result := database.DB.Preload("Children").First(&category, id)
+	result := database.DB.Preload("Children").Preload("Products").First(&category, id)
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to get category: %w", result.Error)
 	}
@@ -56,8 +60,15 @@ func (categoryManager *categoryManager) Get(id string) (*models.Category, error)
 }
 
 func (categoryManager *categoryManager) Update(categoryID string, categoryData *common.CategoryUpdationInput) (*models.Category, error) {
+
+	id, err := strconv.Atoi(categoryID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid category id: %w",err)
+	}
+
+
 	var category models.Category
-	result := database.DB.First(&category, categoryID)
+	result := database.DB.First(&category, id)
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to find category: %w", result.Error)
 	}
@@ -67,6 +78,10 @@ func (categoryManager *categoryManager) Update(categoryID string, categoryData *
 	}
 	if categoryData.Description != "" {
 		category.Description = categoryData.Description
+	}
+
+	if categoryData.ParentID != nil {
+		category.ParentID = categoryData.ParentID
 	}
 
 	result = database.DB.Save(&category)

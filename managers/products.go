@@ -47,6 +47,8 @@ func (productManager *productManager) Create(productData *common.ProductCreation
 		return nil, fmt.Errorf("failed to create new product %w", result.Error)
 	}
 
+	database.DB.Preload("Category").First(&newProduct, newProduct.Id)
+
 	return newProduct, nil
 }
 
@@ -64,7 +66,14 @@ func (productManager *productManager) List() ([]models.Product, error) {
 func (productManager *productManager) Get(id string) (*models.Product, error) {
 	var product models.Product
 
-	result := database.DB.Preload("Category").First(&product, id)
+	productID, err := strconv.Atoi(id)
+	if err != nil {
+		return &models.Product{}, fmt.Errorf("invalid product ID: %w", err)
+	}
+
+	fmt.Printf("Attempting to get product with ID: %d\n", productID)
+	
+	result := database.DB.Preload("Category").First(&product, productID)
 	if result.Error != nil {
 		return &models.Product{}, fmt.Errorf("failed to get product %w", result.Error)
 	}

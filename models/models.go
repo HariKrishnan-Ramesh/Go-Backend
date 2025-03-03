@@ -55,6 +55,7 @@ type Category struct {
 	Description string         `json:"description"`
 	ParentID    *uint          `json:"parentID"`
 	Children    []Category     `json:"children" gorm:"foreignKey:ParentID"`
+	Products    []Product      `json:"products" gorm:"foreignKey:CategoryID"`
 }
 
 type Wishlist struct {
