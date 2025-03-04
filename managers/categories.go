@@ -71,14 +71,12 @@ func (categoryManager *categoryManager) Update(categoryID string, categoryData *
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to find category: %w", result.Error)
 	}
-
 	if categoryData.Name != "" {
-		category.Name = categoryData.Name
+		category.Name = categoryData.Name 
 	}
 	if categoryData.Description != "" {
 		category.Description = categoryData.Description
 	}
-
 	if categoryData.ParentID != nil {
 		category.ParentID = categoryData.ParentID
 	}
