@@ -1,6 +1,5 @@
 package common
 
-
 type ProductCreationInput struct {
 	SKU         string `json:"sku" gorm:"uniqueIndex"`
 	Name        string `json:"name"`
@@ -9,7 +8,6 @@ type ProductCreationInput struct {
 	Image       string `json:"image,omitempty"`
 	CategoryID  uint   `json:"categoryID"`
 }
-
 
 type ProductUpdationInput struct {
 	SKU         string `json:"sku"`
@@ -20,11 +18,10 @@ type ProductUpdationInput struct {
 	CategoryID  uint   `json:"categoryID"`
 }
 
-
-func NewProductCreationInput() *ProductCreationInput{
+func NewProductCreationInput() *ProductCreationInput {
 	return &ProductCreationInput{}
 }
 
-func NewProductUpdationInput() *ProductUpdationInput{
+func NewProductUpdationInput() *ProductUpdationInput {
 	return &ProductUpdationInput{}
 }

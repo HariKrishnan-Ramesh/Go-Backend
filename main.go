@@ -12,14 +12,13 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
 func main() {
 	router := gin.Default()
 
 	err := godotenv.Load()
-    if err != nil {
-        log.Fatalf("Error loading .env file: %v", err)
-    }
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
 
 	log.Println("Database Initializing started...")
 	database.Initialize()
@@ -41,7 +40,7 @@ func main() {
 	wishlistHandler := handlers.NewWishlistHandler(wishlistManager)
 	wishlistHandler.RegisterWishlistApis(router)
 
-	cartManager := managers.NewCartManager() 
+	cartManager := managers.NewCartManager()
 	cartHandler := handlers.NewCartHandler(cartManager)
 	cartHandler.RegisterCartApis(router)
 
@@ -65,12 +64,11 @@ func main() {
 	if err := productManager.SeedProducts(seedCount); err != nil {
 		log.Fatalf("Failed to seed products %v", err)
 	}
-	log.Printf("Successfully seeded %d products.",seedCount)
-
+	log.Printf("Successfully seeded %d products.", seedCount)
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port =  os.Getenv("PORT")
+		port = os.Getenv("PORT")
 	}
 	router.Run(":" + port)
 }
