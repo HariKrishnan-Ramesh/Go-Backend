@@ -76,4 +76,3 @@ func (wishlistmanager *wishlistManager) ViewAll() ([]models.Wishlist, error) {
 
 	return wishlists, nil
 }
-

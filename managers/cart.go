@@ -10,7 +10,7 @@ import (
 type CartManager interface {
 	Add(cartData *common.CartCreationInput) (*models.Cart, error)
 	View(userID uint) ([]models.Cart, error)
-	ViewAll() ([]models.Cart, error) 
+	ViewAll() ([]models.Cart, error)
 	Update(cartID uint, updateData *common.CartUpdateInput) (*models.Cart, error)
 	Delete(cartID uint) error
 }
@@ -35,7 +35,7 @@ func (cartmanager *cartManager) Add(cartData *common.CartCreationInput) (*models
 		}
 		err := database.DB.Preload("User").Preload("Product.Category").First(&existingCartItem, existingCartItem.Id).Error
 		if err != nil {
-			fmt.Printf("Error preloading User/Product: %v\n", err) 
+			fmt.Printf("Error preloading User/Product: %v\n", err)
 		}
 		return &existingCartItem, nil
 	} else if result.Error != nil && result.Error.Error() != "record not found" {
@@ -55,7 +55,7 @@ func (cartmanager *cartManager) Add(cartData *common.CartCreationInput) (*models
 
 	err := database.DB.Preload("User").Preload("Product.Category").First(&newCartItem, newCartItem.Id).Error
 	if err != nil {
-		fmt.Printf("Error preloading User/Product: %v\n", err) 
+		fmt.Printf("Error preloading User/Product: %v\n", err)
 	}
 	return newCartItem, nil
 }
@@ -68,7 +68,6 @@ func (cartmanager *cartManager) View(userID uint) ([]models.Cart, error) {
 	}
 	return cartItems, nil
 }
-
 
 func (cartmanager *cartManager) ViewAll() ([]models.Cart, error) {
 	var cartItems []models.Cart
