@@ -9,7 +9,7 @@ import (
 )
 
 type CartHandler struct {
-	groupName    string
+	groupName   string
 	cartManager managers.CartManager
 }
 
@@ -62,7 +62,6 @@ func (carthandler *CartHandler) View(ctx *gin.Context) {
 	common.SuccessResponseWithData(ctx, "Cart retrieved successfully", cartItems)
 }
 
-
 func (carthandler *CartHandler) ViewAll(ctx *gin.Context) {
 	cartItems, err := carthandler.cartManager.ViewAll()
 	if err != nil {
@@ -97,7 +96,7 @@ func (carthandler *CartHandler) Update(ctx *gin.Context) {
 }
 
 func (carthandler *CartHandler) Delete(ctx *gin.Context) {
-	cartIDStr := ctx.Param("cartid") 
+	cartIDStr := ctx.Param("cartid")
 	cartID, err := strconv.Atoi(cartIDStr)
 	if err != nil {
 		common.BadResponse(ctx, "Invalid Cart ID")
