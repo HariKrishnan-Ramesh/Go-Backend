@@ -32,7 +32,7 @@ func NewProductManager() ProductManager {
 	return &productManager{}
 }
 
-//Create a client
+// Create a client
 func (productManager *productManager) Create(productData *common.ProductCreationInput) (*models.Product, error) {
 	newProduct := &models.Product{
 		SKU:         productData.SKU,
@@ -160,7 +160,7 @@ func (productManager *productManager) GenerateSKU() string {
 	return sku
 }
 
-//Seeding products
+// Seeding products
 func (productManager *productManager) SeedProducts(count int) error {
 
 	lastProductID, err := productManager.GetLastProductID()
@@ -228,7 +228,7 @@ func (productManager *productManager) SeedProducts(count int) error {
 	return nil
 }
 
-//product id generation
+// product id generation
 func (productManager *productManager) GetLastProductID() (int, error) {
 	var product models.Product
 	result := database.DB.Last(&product)
