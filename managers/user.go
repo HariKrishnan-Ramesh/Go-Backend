@@ -3,12 +3,16 @@ package managers
 import (
 	"errors"
 	"fmt"
+	"log"
 	"main/common"
 	"main/database"
 	"main/models"
+	"os"
+	"strconv"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/gomail.v2"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +22,7 @@ var (
 )
 
 type UserManager interface {
-	Create(userData *common.UserCreationInput) (*models.User, error)
+	Create(userData *common.UserCreationInput) (*models.User, string, error)
 	List() ([]models.User, error)
 	Get(id string) (models.User, error)
 	Update(userId string, userData *common.UserUpdationInput) (*models.User, error)
@@ -26,6 +30,8 @@ type UserManager interface {
 	Login(email, password string) (*models.User, string, error)
 	Logout(token string) error
 	ViewProfile(email string) (*common.ProfileResponse, error)
+	SenderVerificationEmail(email string, token string) error
+	VerifyEmail(token string) error
 }
 
 type userManager struct {
@@ -37,53 +43,55 @@ func NewUserManager() UserManager {
 }
 
 // Create New User
-func (userManager *userManager) Create(userData *common.UserCreationInput) (*models.User, error) {
+func (userManager *userManager) Create(userData *common.UserCreationInput) (*models.User, string, error) {
 
 	var existingemail models.User
 	value := database.DB.Where("email = ?", userData.Email).First(&existingemail)
 	if !errors.Is(value.Error, gorm.ErrRecordNotFound) {
 		if value.Error == nil {
-			return nil, ErrEmailAlreadyExists
+			return nil, "", ErrEmailAlreadyExists
 		}
-		return nil, fmt.Errorf("failed to check email existence %w", value.Error)
+		return nil, "", fmt.Errorf("failed to check email existence %w", value.Error)
 	}
 
 	// Generate a UUID for the token
 	uuidToken, err := uuid.NewUUID()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate UUID: %w", err)
+		return nil, "", fmt.Errorf("failed to generate UUID: %w", err)
 	}
+	verificationToken := uuidToken.String()
 
 	newUser := &models.User{
-		FirstName: userData.FirstName,
-		LastName:  userData.LastName,
-		Email:     userData.Email,
-		Password:  userData.Password,
-		Phone:     userData.Phone,
-		Token:     uuidToken.String(),
-		Address:   models.Address(userData.Address),
-		Image:     userData.Image,
+		FirstName:         userData.FirstName,
+		LastName:          userData.LastName,
+		Email:             userData.Email,
+		Password:          userData.Password,
+		Phone:             userData.Phone,
+		VerificationToken: verificationToken,
+		Token:             uuidToken.String(),
+		Address:           models.Address(userData.Address),
+		Image:             userData.Image,
 	}
 
 	//Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userData.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, fmt.Errorf("failed to hash the password: %w", err)
+		return nil, "", fmt.Errorf("failed to hash the password: %w", err)
 	}
 
 	newUser.Password = string(hashedPassword)
 
 	result := database.DB.Create(newUser)
 	if result.Error != nil {
-		return nil, fmt.Errorf("failed to create a user: %w", result.Error)
+		return nil, "", fmt.Errorf("failed to create a user: %w", result.Error)
 	}
 
 	if newUser.Id == 0 {
 
-		return nil, errors.New("failed to create a new user")
+		return nil, "", errors.New("failed to create a new user")
 	}
 
-	return newUser, nil
+	return newUser, verificationToken, nil
 }
 
 // List All Users
@@ -239,4 +247,83 @@ func (userManager *userManager) ViewProfile(email string) (*common.ProfileRespon
 	}
 
 	return profile, nil
+}
+
+func (userManager *userManager) SenderVerificationEmail(email string, token string) error {
+	smtpServer := os.Getenv("SMTP_SERVER")
+	smtpPort := os.Getenv("SMTP_PORT")
+	smtpUsername := os.Getenv("SMTP_USERNAME")
+	smtpPassword := os.Getenv("SMTP_PASSWORD")
+	fromEmail := os.Getenv("FROM_EMAIL")
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", fromEmail)
+	m.SetHeader("To", email)
+	m.SetHeader("Subject", "Verify your Email address")
+	htmlBody := fmt.Sprintf(`
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<meta charset="UTF-8">
+	<title>Verify Your Email</title>
+	</head>
+	<body>
+	<p>Hello!</p>
+	<p>Please click the link below to verify your email address:</p>
+	<a href="http://localhost:8080/api/user/verify?token=%s">Verify Email</a>
+	<p>If you did not request this, please ignore this email.</p>
+	</body>
+	</html>
+	`, token)
+
+	m.SetBody("text/html", htmlBody) 
+
+	port, err := strconv.Atoi(smtpPort)
+	if err != nil {
+		log.Printf("SMTP Conversion error: %v",err)
+		return fmt.Errorf("invalid SMTP_PORT: %w", err)
+	}
+
+	d := gomail.NewDialer(smtpServer, port, smtpUsername, smtpPassword)
+
+
+	smtpClient, err := d.Dial()
+	if err != nil {
+		log.Printf("SMTP Connection Error: %v", err) // Log connection errors
+		return fmt.Errorf("failed to connect to SMTP server: %w", err)
+	}
+    smtpClient.Close()
+
+	if err := d.DialAndSend(m); err != nil {
+		log.Printf("Email Sending error: %v",err)
+		return fmt.Errorf("failed to send email: %w", err)
+	}
+
+	return nil
+}
+
+func (userManager *userManager) VerifyEmail(token string) error {
+
+	var user models.User
+
+	result := database.DB.Where("verification_token = ?", token).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return ErrInvalidToken
+		}
+		return fmt.Errorf("failed to find user by token: %w", result.Error)
+	}
+
+	if user.IsVerified {
+		return nil
+	}
+
+	user.IsVerified = true
+	user.VerificationToken = ""
+	result = database.DB.Save(&user)
+	if result.Error != nil {
+		return fmt.Errorf("failed to update user for verification: %w", result.Error)
+	}
+
+	return nil
 }

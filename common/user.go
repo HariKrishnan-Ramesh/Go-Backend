@@ -137,3 +137,4 @@ type JWTClaim struct {
 	Email string
 	jwt.RegisteredClaims
 }
+
