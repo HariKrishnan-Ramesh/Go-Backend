@@ -17,18 +17,20 @@ type Address struct {
 
 type User struct {
 	//gorm.Model
-	Id        uint           `gorm:"primarykey" json:"id"`
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	FirstName string         `json:"firstName"`
-	LastName  string         `json:"lastName"`
-	Email     string         `json:"email"`
-	Password  string         `json:"password"`
-	Phone     string         `json:"phone"`
-	Token     string         `gorm:"uniqueIndex:idx_users_token,length:191" json:"-"`
-	Address   Address        `json:"address" gorm:"embedded"`
-	Image     string         `json:"image,omitempty"`
+	Id                uint           `gorm:"primarykey" json:"id"`
+	CreatedAt         time.Time      `json:"createdAt"`
+	UpdatedAt         time.Time      `json:"updatedAt"`
+	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
+	FirstName         string         `json:"firstName"`
+	LastName          string         `json:"lastName"`
+	Email             string         `json:"email"`
+	Password          string         `json:"password"`
+	Phone             string         `json:"phone"`
+	VerificationToken string         `gorm:"column:verification_token" json:"-"`
+	IsVerified        bool           `gorm:"column:is_verified;default:false" json:"isVerified"`
+	Token             string         `gorm:"uniqueIndex:idx_users_token,length:191" json:"-"`
+	Address           Address        `json:"address" gorm:"embedded"`
+	Image             string         `json:"image,omitempty"`
 }
 
 type Product struct {

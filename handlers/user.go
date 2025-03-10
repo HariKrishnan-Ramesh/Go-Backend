@@ -80,6 +80,7 @@ func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 	userGroup.POST("/login", userHandler.Login)
 	userGroup.POST("/logout", userHandler.Logout)
 	userGroup.GET("/profile", AuthMiddleware(), userHandler.ViewProfile)
+	userGroup.GET("/verify",userHandler.VerifyEmail)
 
 }
 
@@ -91,7 +92,8 @@ func (userHandler *UserHandler) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	newUser, err := userHandler.userManager.Create(userData)
+	newUser,verificationToken, err := userHandler.userManager.Create(userData)
+
 	if err != nil {
 		if errors.Is(err, managers.ErrEmailAlreadyExists) {
 			common.BadResponse(ctx, "Email Already Exists")
@@ -102,20 +104,26 @@ func (userHandler *UserHandler) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	token, err := common.GenerateJWT(newUser.Email)
-	if err != nil {
-		fmt.Println("Error generating token: ", err)
-		common.InternalServerErrorResponse(ctx, "Failed to Generate token")
+	// token, err := common.GenerateJWT(newUser.Email)
+	// if err != nil {
+	// 	fmt.Println("Error generating token: ", err)
+	// 	common.InternalServerErrorResponse(ctx, "Failed to Generate token")
+	// 	return
+	// }
+
+	if err := userHandler.userManager.SenderVerificationEmail(newUser.Email, verificationToken); err != nil {
+		log.Printf("Error sending verification email: %v", err)
+		common.InternalServerErrorResponse(ctx, "Failed to send verification email")
 		return
 	}
 
-	common.SuccessResponseWithData(ctx, "Signup Successfull", gin.H{
+	common.SuccessResponseWithData(ctx, "Signup Successfull.Please check you email for verification", gin.H{
 		"user_id":  newUser.Id,
 		"email":    newUser.Email,
-		"username": newUser.FirstName,
-		"token":    token,
-		"address":  newUser.Address,
-		"image":    newUser.Image,
+		// "username": newUser.FirstName,
+		// "token":    token,
+		// "address":  newUser.Address,
+		// "image":    newUser.Image,
 	})
 
 }
@@ -132,7 +140,7 @@ func (userHandler *UserHandler) Create(ctx *gin.Context) {
 		common.BadResponse(ctx, "Failed to bind data")
 	}
 
-	newUser, err := userHandler.userManager.Create(userData)
+	newUser,_, err := userHandler.userManager.Create(userData)
 
 	if err != nil {
 
@@ -246,6 +254,10 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		common.BadResponse(ctx, "Invalid Credentials")
 		return
 	}
+	 
+	if !user.IsVerified {
+		common.BadResponse(ctx,"Email is not verified. Please check your inbox.")
+	}
 
 	fmt.Println("Login: Token from login API:", token)
 
@@ -295,4 +307,26 @@ func (userHandler *UserHandler) ViewProfile(ctx *gin.Context) {
 	}
 
 	common.SuccessResponseWithData(ctx, "Profile retrieved successfully", profile)
+}
+
+
+func (userHandler *UserHandler) VerifyEmail(ctx *gin.Context) {
+	token := ctx.Query("token")
+
+	if token == "" {
+		common.BadResponse(ctx, "Verification token is missing")
+		return
+	}
+
+	err := userHandler.userManager.VerifyEmail(token)
+	if err != nil {
+		if errors.Is(err, managers.ErrInvalidToken) {
+			common.BadResponse(ctx, "Invalid or expired verification token")
+		} else {
+			log.Printf("Error during email verification for token %s: %v",token, err)
+			common.InternalServerErrorResponse(ctx, "Failed to verify email")
+		}
+		return
+	}
+	common.SuccessResponse(ctx, "Email verified successfully")
 }
