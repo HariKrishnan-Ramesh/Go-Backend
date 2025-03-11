@@ -22,10 +22,8 @@ var (
 	ErrInvalidToken       = errors.New("invalid token")
 )
 
-
 //go:embed message.html
 var htmlFile embed.FS
-
 
 type UserManager interface {
 	Create(userData *common.UserCreationInput) (*models.User, string, error)
@@ -267,35 +265,42 @@ func (userManager *userManager) SenderVerificationEmail(email string, token stri
 	m.SetHeader("To", email)
 	m.SetHeader("Subject", "Verify your Email address")
 
+	user := models.User{}
+
+	result := database.DB.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return fmt.Errorf("failed to find user: %w", result.Error)
+	}
+
+	//verificationURL := fmt.Sprintf("%s/api/user/verify?token=%s",baseURL,token)
+
 	htmlBody, err := readMessageFromFile("message.html")
 	if err != nil {
 		log.Printf("Error reading message.html: %v", err)
 		return fmt.Errorf("failed to read the message.html: %w", err)
 	}
 
+	htmlBody = fmt.Sprintf(htmlBody, user.FirstName, token)
 
-	htmlBody = fmt.Sprintf(htmlBody, token)
-
-	m.SetBody("text/html", htmlBody) 
+	m.SetBody("text/html", htmlBody)
 
 	port, err := strconv.Atoi(smtpPort)
 	if err != nil {
-		log.Printf("SMTP Conversion error: %v",err)
+		log.Printf("SMTP Conversion error: %v", err)
 		return fmt.Errorf("invalid SMTP_PORT: %w", err)
 	}
 
 	d := gomail.NewDialer(smtpServer, port, smtpUsername, smtpPassword)
-
 
 	smtpClient, err := d.Dial()
 	if err != nil {
 		log.Printf("SMTP Connection Error: %v", err) // Log connection errors
 		return fmt.Errorf("failed to connect to SMTP server: %w", err)
 	}
-    smtpClient.Close()
+	smtpClient.Close()
 
 	if err := d.DialAndSend(m); err != nil {
-		log.Printf("Email Sending error: %v",err)
+		log.Printf("Email Sending error: %v", err)
 		return fmt.Errorf("failed to send email: %w", err)
 	}
 
@@ -328,10 +333,10 @@ func (userManager *userManager) VerifyEmail(token string) error {
 	return nil
 }
 
-func readMessageFromFile(filename string) (string,error) {
+func readMessageFromFile(filename string) (string, error) {
 	content, err := htmlFile.ReadFile(filename)
 	if err != nil {
 		return "", err
 	}
-	return string(content),nil
+	return string(content), nil
 }
