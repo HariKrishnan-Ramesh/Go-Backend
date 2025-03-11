@@ -1,6 +1,7 @@
 package managers
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"log"
@@ -20,6 +21,11 @@ var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
 	ErrInvalidToken       = errors.New("invalid token")
 )
+
+
+//go:embed message.html
+var htmlFile embed.FS
+
 
 type UserManager interface {
 	Create(userData *common.UserCreationInput) (*models.User, string, error)
@@ -260,21 +266,15 @@ func (userManager *userManager) SenderVerificationEmail(email string, token stri
 	m.SetHeader("From", fromEmail)
 	m.SetHeader("To", email)
 	m.SetHeader("Subject", "Verify your Email address")
-	htmlBody := fmt.Sprintf(`
-	<!DOCTYPE html>
-	<html>
-	<head>
-	<meta charset="UTF-8">
-	<title>Verify Your Email</title>
-	</head>
-	<body>
-	<p>Hello!</p>
-	<p>Please click the link below to verify your email address:</p>
-	<a href="http://localhost:8080/api/user/verify?token=%s">Verify Email</a>
-	<p>If you did not request this, please ignore this email.</p>
-	</body>
-	</html>
-	`, token)
+
+	htmlBody, err := readMessageFromFile("message.html")
+	if err != nil {
+		log.Printf("Error reading message.html: %v", err)
+		return fmt.Errorf("failed to read the message.html: %w", err)
+	}
+
+
+	htmlBody = fmt.Sprintf(htmlBody, token)
 
 	m.SetBody("text/html", htmlBody) 
 
@@ -326,4 +326,12 @@ func (userManager *userManager) VerifyEmail(token string) error {
 	}
 
 	return nil
+}
+
+func readMessageFromFile(filename string) (string,error) {
+	content, err := htmlFile.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	return string(content),nil
 }
