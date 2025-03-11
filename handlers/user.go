@@ -120,8 +120,8 @@ func (userHandler *UserHandler) SignUp(ctx *gin.Context) {
 	common.SuccessResponseWithData(ctx, "Signup Successfull.Please check you email for verification", gin.H{
 		"user_id":  newUser.Id,
 		"email":    newUser.Email,
-		// "username": newUser.FirstName,
-		// "token":    token,
+		"username": newUser.FirstName,
+		"token":    verificationToken,
 		// "address":  newUser.Address,
 		// "image":    newUser.Image,
 	})
@@ -257,6 +257,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	 
 	if !user.IsVerified {
 		common.BadResponse(ctx,"Email is not verified. Please check your inbox.")
+		return
 	}
 
 	fmt.Println("Login: Token from login API:", token)
