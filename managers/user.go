@@ -272,7 +272,6 @@ func (userManager *userManager) SenderVerificationEmail(email string, token stri
 		return fmt.Errorf("failed to find user: %w", result.Error)
 	}
 
-	//verificationURL := fmt.Sprintf("%s/api/user/verify?token=%s",baseURL,token)
 
 	htmlBody, err := readMessageFromFile("message.html")
 	if err != nil {
@@ -294,7 +293,7 @@ func (userManager *userManager) SenderVerificationEmail(email string, token stri
 
 	smtpClient, err := d.Dial()
 	if err != nil {
-		log.Printf("SMTP Connection Error: %v", err) // Log connection errors
+		log.Printf("SMTP Connection Error: %v", err) 
 		return fmt.Errorf("failed to connect to SMTP server: %w", err)
 	}
 	smtpClient.Close()
