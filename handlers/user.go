@@ -3,8 +3,6 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"log"
 	"main/common"
 	"main/managers"
@@ -12,6 +10,10 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type UserHandler struct {
@@ -80,7 +82,7 @@ func (userHandler *UserHandler) RegisterUserApis(router *gin.Engine) {
 	userGroup.POST("/login", userHandler.Login)
 	userGroup.POST("/logout", userHandler.Logout)
 	userGroup.GET("/profile", AuthMiddleware(), userHandler.ViewProfile)
-	userGroup.GET("/verify",userHandler.VerifyEmail)
+	userGroup.GET("/verify", userHandler.VerifyEmail)
 
 }
 
@@ -92,7 +94,7 @@ func (userHandler *UserHandler) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	newUser,verificationToken, err := userHandler.userManager.Create(userData)
+	newUser, verificationToken, err := userHandler.userManager.Create(userData)
 
 	if err != nil {
 		if errors.Is(err, managers.ErrEmailAlreadyExists) {
@@ -140,7 +142,7 @@ func (userHandler *UserHandler) Create(ctx *gin.Context) {
 		common.BadResponse(ctx, "Failed to bind data")
 	}
 
-	newUser,_, err := userHandler.userManager.Create(userData)
+	newUser, _, err := userHandler.userManager.Create(userData)
 
 	if err != nil {
 
@@ -254,9 +256,9 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		common.BadResponse(ctx, "Invalid Credentials")
 		return
 	}
-	 
+
 	if !user.IsVerified {
-		common.BadResponse(ctx,"Email is not verified. Please check your inbox.")
+		common.BadResponse(ctx, "Email is not verified. Please check your inbox.")
 		return
 	}
 
@@ -310,7 +312,6 @@ func (userHandler *UserHandler) ViewProfile(ctx *gin.Context) {
 	common.SuccessResponseWithData(ctx, "Profile retrieved successfully", profile)
 }
 
-
 func (userHandler *UserHandler) VerifyEmail(ctx *gin.Context) {
 	token := ctx.Query("token")
 
@@ -324,7 +325,7 @@ func (userHandler *UserHandler) VerifyEmail(ctx *gin.Context) {
 		if errors.Is(err, managers.ErrInvalidToken) {
 			common.BadResponse(ctx, "Invalid or expired verification token")
 		} else {
-			log.Printf("Error during email verification for token %s: %v",token, err)
+			log.Printf("Error during email verification for token %s: %v", token, err)
 			common.InternalServerErrorResponse(ctx, "Failed to verify email")
 		}
 		return

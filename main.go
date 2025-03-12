@@ -45,6 +45,10 @@ func main() {
 	cartHandler := handlers.NewCartHandler(cartManager)
 	cartHandler.RegisterCartApis(router)
 
+	otpManager := managers.NewOtpManager()
+	otpHandler := handlers.NewOtpHandler(otpManager)
+	otpHandler.RegisterOtpApis(router)
+
 	if err := productManager.SeedCategories(); err != nil {
 		log.Fatalf("Failed to seed categories: %v", err)
 	}
