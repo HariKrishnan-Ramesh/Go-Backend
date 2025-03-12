@@ -80,3 +80,12 @@ type Cart struct {
 	User      User      `json:"user" gorm:"foreignKey:UserID"`
 	Product   Product   `json:"product" gorm:"foreignKey:ProductID"`
 }
+
+type Otp struct{
+	ID uint `gorm:"primaryKey"`
+	UserID uint `json:"userId"`
+	User User `gorm:"foreignKey:UserID"`
+	OTP string 	`json:"otp"`
+	CreatedAt time.Time `json:"createdAt"`
+	ExpiresAt time.Time `json:"expiresAt"`
+}
