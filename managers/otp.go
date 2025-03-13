@@ -41,7 +41,7 @@ const otpExpiration = 5 * time.Minute
 func (otpManager *otpManager) SendOTP(userID uint, phoneNumber string) error {
 	phoneNumber = formatPhoneNumber(phoneNumber)
 
-	otp := common.GenrateOTP(otpLength)
+	otp := common.GenerateOTP(otpLength)
 
 	expiresAt := time.Now().Add(otpExpiration)
 
