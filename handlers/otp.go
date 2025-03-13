@@ -54,21 +54,15 @@ func (otpHandler *OtpHandler) SendOTP(ctx *gin.Context) {
 }
 
 func (otpHandler *OtpHandler) VerifyOTP(ctx *gin.Context) {
-	userIDStr := ctx.Query("user_id")
+	phoneNumber := ctx.Query("phone_number")
 	otp := ctx.Query("otp")
 
-	if userIDStr == "" || otp == "" {
-		common.BadResponse(ctx, "User ID and OTP are required")
+	if phoneNumber == "" || otp == "" {
+		common.BadResponse(ctx, "Phone Number and OTP are required")
 		return
 	}
 
-	userID, err := strconv.ParseUint(userIDStr, 10, 32)
-	if err != nil {
-		common.BadResponse(ctx, "Invalid user ID")
-		return
-	}
-
-	err = otpHandler.otpManager.VerifyOTP(uint(userID), otp)
+	err := otpHandler.otpManager.VerifyOTP(phoneNumber, otp)
 	if err != nil {
 		if errors.Is(err, managers.ErrInvalidOTP) {
 			common.BadResponse(ctx, "Invalid OTP")
