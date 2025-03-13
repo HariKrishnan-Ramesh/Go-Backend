@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func GenrateOTP(length int) string {
+func GenerateOTP(length int) string {
 	rand.Seed(time.Now().UnixNano())
 	const chars = "0123456789"
 	result := make([]byte,length)
