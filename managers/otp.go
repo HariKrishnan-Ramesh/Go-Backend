@@ -74,7 +74,6 @@ func (otpManager *otpManager) SendOTP(userID uint, phoneNumber string) error {
 func (otpManager *otpManager) VerifyOTP(phoneNumber string, otp string) error {
 	phoneNumber = formatPhoneNumber(phoneNumber)
 
-	// 1. Find the User by Phone Number
 	var user models.User
 	result := database.DB.Where("phone = ?", phoneNumber).First(&user)
 	if result.Error != nil {
@@ -84,7 +83,6 @@ func (otpManager *otpManager) VerifyOTP(phoneNumber string, otp string) error {
 		return fmt.Errorf("failed to find user by phone number: %w", result.Error)
 	}
 
-	// 2. Find the OTP Record for that User and OTP
 	var otpRecord models.Otp
 
 	result = database.DB.Where("user_id = ? AND otp = ?", user.Id, otp).
@@ -93,23 +91,21 @@ func (otpManager *otpManager) VerifyOTP(phoneNumber string, otp string) error {
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return ErrInvalidOTP // No matching OTP found for this user
+			return ErrInvalidOTP
 		}
 		return fmt.Errorf("failed to find OTP record: %w", result.Error)
 	}
 
-	// 3. Check if the OTP has expired
 	if otpRecord.ExpiresAt.Before(time.Now()) {
 		return ErrOTPExpired
 	}
 
-	// 4. Delete the OTP record (after successful verification)
 	result = database.DB.Delete(&otpRecord)
 	if result.Error != nil {
 		log.Printf("Error deleting OTP record: %v", result.Error)
 	}
 
-	return nil // OTP verification successful
+	return nil
 }
 
 func sendOTP(phoneNumber, otp string) error {
