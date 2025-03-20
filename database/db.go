@@ -19,7 +19,7 @@ func Initialize() {
 	dbHost := os.Getenv("DB_HOST")
 	dbName := os.Getenv("DB_NAME")
 	dbPort := os.Getenv("DB_PORT")
-
+              
 	//log.Fatalf("Connection established %w",dbUser) Like this {other functions also printed} can be used to DEBUG to know the connection established is correct or not.
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
